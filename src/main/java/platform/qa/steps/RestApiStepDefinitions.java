@@ -41,17 +41,17 @@ public class RestApiStepDefinitions {
     private RegistryConfig registryConfig = MasterConfig.getInstance().getRegistryConfig();
     private TestContext testContext;
 
-
     public RestApiStepDefinitions(TestContext testContext) {
         this.testContext = testContext;
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.registerParser("text/plain", Parser.JSON);
     }
 
-    @Коли("виконується запит пошуку {string} з параметрами")
-    public void executeGetApiWithParameters(@NonNull String path,
+    @Коли("користувач {string} виконує запит пошуку {string} з параметрами")
+    public void executeGetApiWithParameters(String userName,
+                                            @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
-        var result = new DataFactoryClient(registryConfig.getDataFactory(), registryConfig.getDigitalSignatureOps())
+        var result = new DataFactoryClient(registryConfig.getDataFactory(userName), registryConfig.getDigitalSignatureOps(userName))
                 .sendGetWithParams(path, queryParams)
                 .extract()
                 .response()
@@ -60,9 +60,10 @@ public class RestApiStepDefinitions {
         testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, result);
     }
 
-    @Коли("виконується запит пошуку {string} без параметрів")
-    public void executeGetApiWithoutParameters(String path) {
-        var result = new DataFactoryClient(registryConfig.getDataFactory(), registryConfig.getDigitalSignatureOps())
+    @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
+    public void executeGetApiWithoutParameters(String userName,
+                                               String path) {
+        var result = new DataFactoryClient(registryConfig.getDataFactory(userName), registryConfig.getDigitalSignatureOps(userName))
                 .get(path)
                 .then()
                 .statusCode(in(getSuccessStatuses()))

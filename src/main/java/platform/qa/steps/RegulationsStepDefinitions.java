@@ -70,8 +70,8 @@ public class RegulationsStepDefinitions {
         assertThat(bpmnFiles).as("Регламент не розгорнувся:").hasSizeGreaterThan(0);
     }
 
-    @Коли("адміністратор регламенту отримує наявні бізнес процеси та відповідні їм форми через сервіси платформи")
-    public void getProcessesAndForms() {
+    @Коли("адміністратор регламенту {string} отримує наявні бізнес процеси та відповідні їм форми через сервіси платформи")
+    public void getProcessesAndForms(String userName) {
         List<File> bpmnFiles = (List<File>) testContext.getScenarioContext().getContext(Context.BPMN_FILE_NAMES);
         assertThat(bpmnFiles).as("В розгорнутому регламенті немає списку bpmn файлів процесів:").hasSizeGreaterThan(0);
 
@@ -81,24 +81,24 @@ public class RegulationsStepDefinitions {
         List<String> processNames = getProcessNamesFromBpmnFiles(bpmnFiles);
         testContext.getScenarioContext().setContext(Context.BPMN_PROCESS_NAME_LIST, processNames);
 
-        List<String> deployedFormKeys = getDeployedFormsFromProvider();
+        List<String> deployedFormKeys = getDeployedFormsFromProvider(userName);
         testContext.getScenarioContext().setContext(Context.API_FORM_KEY_LIST, deployedFormKeys);
 
-        List<String> deployedProcessNames = getDeployedProcessesFromBpms();
+        List<String> deployedProcessNames = getDeployedProcessesFromBpms(userName);
         testContext.getScenarioContext().setContext(Context.API_PROCESS_NAME_LIST, deployedProcessNames);
     }
 
-    private List<String> getDeployedProcessesFromBpms() {
+    private List<String> getDeployedProcessesFromBpms(String userName) {
         log.info("Start getting processes from Business Process Management!");
         List<Definition> deployedProcesses =
-                new ProcessDefinitionApi(registryConfig.getBpms()).getAllDefinitions();
+                new ProcessDefinitionApi(registryConfig.getBpms(userName)).getAllDefinitions();
         return deployedProcesses.stream().map(Definition::getName).collect(Collectors.toList());
     }
 
-    private List<String> getDeployedFormsFromProvider() {
+    private List<String> getDeployedFormsFromProvider(String userName) {
         log.info("Start getting forms from Form Provider!");
         List<Map> deployedForms =
-                new FormManagementProviderApi(registryConfig.getFormManagementProvider()).getAllForms();
+                new FormManagementProviderApi(registryConfig.getFormManagementProvider(userName)).getAllForms();
         return deployedForms.stream().map(form -> form.get("name").toString()).collect(Collectors.toList());
     }
 

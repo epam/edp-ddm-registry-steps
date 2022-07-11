@@ -42,9 +42,9 @@ public class DataModelStepDefinitions {
         this.testContext = testContext;
     }
 
-    @Дано("розгорнута модель даних з переліком таблиць та згенерованими запитами доступу та пошуку даних")
-    public void verifyDataFactoryInit() {
-        assertThat(registryConfig.getDataFactory().getUrl())
+    @Дано("користувачу {string} доступна розгорнута модель даних з переліком таблиць та згенерованими запитами доступу та пошуку даних")
+    public void verifyDataFactoryInit(String userName) {
+        assertThat(registryConfig.getDataFactory(userName).getUrl())
                 .as("Модель даних не розгорнута!!!")
                 .isNotNull();
     }

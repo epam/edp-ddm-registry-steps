@@ -25,7 +25,7 @@ import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Та;
 import io.cucumber.java.uk.Тоді;
-import platform.qa.base.providers.UserProvider;
+import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
 import platform.qa.enums.FieldType;
@@ -35,6 +35,7 @@ import platform.qa.officer.pages.MyTasksPage;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
 import platform.qa.officer.steps.LoginSteps;
+import platform.qa.providers.impl.RegistryUserProvider;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,7 @@ import java.util.NoSuchElementException;
  */
 public class OfficerCabinetStepDefinitions {
 
-    private UserProvider users = UserProvider.getInstance();
+    private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
     public OfficerCabinetStepDefinitions(TestContext testContext) {
@@ -83,11 +84,11 @@ public class OfficerCabinetStepDefinitions {
     @Дано("користувач {string} успішно увійшов у кабінет посадової особи")
     public void verifyOfficerOpenDashboardPage(String userName) {
         new LoginSteps()
-                .loginOfficerPortal(users.getUserByName(userName));
-        testContext.getScenarioContext().setContext(OFFICER_USER_LOGIN, users.getUserByName(userName).getLogin());
+                .loginOfficerPortal(users.get(userName));
+        testContext.getScenarioContext().setContext(OFFICER_USER_LOGIN, users.get(userName).getLogin());
     }
 
-    @Та("бачить доступний процес {string}")
+    @Дано("бачить доступний процес {string}")
     public void verifyProcessAvailable(String processName) {
         new DashboardPage()
                 .clickOnAvailableServices()
@@ -127,7 +128,7 @@ public class OfficerCabinetStepDefinitions {
                 .submitForm();
     }
 
-//TODO "This step should be rewritten without using |";
+// TODO "This step should be rewritten without using |";
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
     public void checkMessage(String formName, String messageLabel, String messageText){
         new TaskPage()
@@ -145,7 +146,7 @@ public class OfficerCabinetStepDefinitions {
     @Коли("підписує дані")
     public void signFormUserFromContext() {
         new SignTaskPage()
-                .signTask(users.getUserByName((String) testContext.getScenarioContext().getContext(OFFICER_USER_LOGIN)));
+                .signTask(users.get((String) testContext.getScenarioContext().getContext(OFFICER_USER_LOGIN)));
     }
 
     @Тоді("процес закінчено успішно й задача {string} відображається як виконана у переліку задач")
@@ -167,5 +168,4 @@ public class OfficerCabinetStepDefinitions {
         taskPage
                 .clickSaveButton();
     }
-
 }
