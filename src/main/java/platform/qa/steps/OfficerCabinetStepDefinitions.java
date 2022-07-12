@@ -34,7 +34,6 @@ import platform.qa.officer.pages.DashboardPage;
 import platform.qa.officer.pages.MyTasksPage;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
-import platform.qa.officer.panel.OfficerHeaderPanel;
 import platform.qa.officer.steps.LoginSteps;
 
 import java.util.Arrays;
@@ -88,7 +87,7 @@ public class OfficerCabinetStepDefinitions {
         testContext.getScenarioContext().setContext(OFFICER_USER_LOGIN, users.getUserByName(userName).getLogin());
     }
 
-    @Дано("бачить доступний процес {string}")
+    @Та("бачить доступний процес {string}")
     public void verifyProcessAvailable(String processName) {
         new DashboardPage()
                 .clickOnAvailableServices()
@@ -122,18 +121,13 @@ public class OfficerCabinetStepDefinitions {
         }
     }
 
-    @Коли("натискає кнопку \"Додати\" у {string}")
-    public void addNewRowToTheTable(String tableName) {
-        new TaskPage()
-                .addNewRow(tableName);
-    }
-
     @Та("натискає кнопку \"Далі\"")
     public void clickButton() {
         new TaskPage()
                 .submitForm();
     }
 
+//TODO "This step should be rewritten without using |";
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
     public void checkMessage(String formName, String messageLabel, String messageText){
         new TaskPage()
@@ -148,13 +142,7 @@ public class OfficerCabinetStepDefinitions {
                 .checkFieldsAreNotEditable();
     }
 
-    @Коли("користувач {string} підписує форму")
-    public void signForm(String userName) {
-        new SignTaskPage()
-                .signTask(users.getUserByName(userName));
-    }
-
-    @Коли("підписує їх")
+    @Коли("підписує дані")
     public void signFormUserFromContext() {
         new SignTaskPage()
                 .signTask(users.getUserByName((String) testContext.getScenarioContext().getContext(OFFICER_USER_LOGIN)));
@@ -165,14 +153,6 @@ public class OfficerCabinetStepDefinitions {
         new MyTasksPage().checkNotificationMessage(taskName)
                 .clickOnProvisionedTasksTab()
                 .checkTaskExistsByTaskName(taskName);
-    }
-
-    @Та("користувач закриває кабінет чиновника")
-    public void logoutOfficerPortal() {
-        new OfficerHeaderPanel()
-                .clickOnHeaderName()
-                .clickOnUserInfoLink()
-                .clickLogOutButton();
     }
 
     @І("додає запис до {string} таблиці із даними")
