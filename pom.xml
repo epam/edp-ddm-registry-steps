@@ -25,7 +25,6 @@
         <keycloak-qa-client.version>1.6.0.43</keycloak-qa-client.version>
         <openshift-qa-client.version>1.6.0.43</openshift-qa-client.version>
         <protocols-qa-client.version>1.6.0.43</protocols-qa-client.version>
-        <data-factory-qa-client.version>1.6.0.43</data-factory-qa-client.version>
         <git-qa-client.version>1.6.0.43</git-qa-client.version>
         <form-management-steps.version>1.6.0.38</form-management-steps.version>
         <bpms-steps.version>1.6.0.38</bpms-steps.version>
@@ -71,13 +70,6 @@
             <groupId>platform.qa</groupId>
             <artifactId>protocols-qa-client</artifactId>
             <version>${protocols-qa-client.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>platform.qa</groupId>
-            <artifactId>data-factory-qa-client</artifactId>
-            <version>${data-factory-qa-client.version}</version>
             <scope>compile</scope>
         </dependency>
 

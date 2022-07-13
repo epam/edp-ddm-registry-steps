@@ -24,11 +24,11 @@ import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
-import platform.qa.DataFactoryClient;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.enums.Context;
+import platform.qa.rest.RestApiClient;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class RestApiStepDefinitions {
     public void executeGetApiWithParameters(String userName,
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
-        var result = new DataFactoryClient(registryConfig.getDataFactory(userName), registryConfig.getDigitalSignatureOps(userName))
+        var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, queryParams)
                 .extract()
                 .response()
@@ -63,7 +63,7 @@ public class RestApiStepDefinitions {
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
     public void executeGetApiWithoutParameters(String userName,
                                                String path) {
-        var result = new DataFactoryClient(registryConfig.getDataFactory(userName), registryConfig.getDigitalSignatureOps(userName))
+        var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .get(path)
                 .then()
                 .statusCode(in(getSuccessStatuses()))
