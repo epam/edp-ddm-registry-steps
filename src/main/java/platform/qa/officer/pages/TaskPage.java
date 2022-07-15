@@ -35,6 +35,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
@@ -42,18 +45,23 @@ public class TaskPage extends CommonTaskPage {
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
-    private final String radioButtonPath = "//span[text()[contains(.,\"%s\")]]" +
+    private final String radioButtonInputPath = "//span[text()[contains(.,\"%s\")]]" +
             "/preceding-sibling::span//input[@type='radio']";
-    private final String checkboxPath = "//span[text()[contains(.,\"%s\")]]" +
+    private final String radioButtonPath = "//span[text()[contains(.,\"%s\")]]" +
+            "/preceding-sibling::span";
+    private final String checkboxInputPath = "//span[text()[contains(.,\"%s\")]]" +
             "/parent::span/preceding-sibling::span//input[@type='checkbox']";
+    private final String checkboxPath = "//span[text()[contains(.,\"%s\")]]" +
+            "/parent::span/preceding-sibling::span";
     private final String dateTimePath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
     private final String addNewRowButtonPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//button";
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
-    private final String addButton = "//label[text()[contains(.,\"%s\")]]" +
+    private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//button";
+    private final String submitButtonPath = "//button[@type=\"submit\"]";
 
     public TaskPage() {
         super();
@@ -66,54 +74,95 @@ public class TaskPage extends CommonTaskPage {
     }
 
     public void fillInputFieldWithData(String fieldName, String fieldData) {
-        wait
-                .until(presenceOfElementLocated(xpath(format(this.inputPath, fieldName))))
-                .sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData);
+        By inputField = xpath(format(this.inputPath, fieldName));
+        wait.until(presenceOfElementLocated(inputField));
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                requireNonNull(driver)
+                        .findElement(inputField)
+                        .isEnabled());
+        driver.findElement(inputField).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData);
     }
 
+    public void checkFieldIsFilledWithData(String fieldXpath, String fieldData) {
+        wait.until(presenceOfElementLocated(xpath(fieldXpath)));
+        wait.until(attributeContains(xpath(fieldXpath), "value", fieldData));
+    }
 
     public void checkSubmitButtonState(boolean isEnabled) {
+        wait.until(presenceOfElementLocated(xpath(submitButtonPath)));
         if (isEnabled) {
-            wait.until(elementToBeClickable(xpath("//button[@type=\"submit\"]")));
+            wait.until(elementToBeClickable(xpath(submitButtonPath)));
         } else {
-            wait.until(not(elementToBeClickable(xpath("//button[@type=\"submit\"]"))));
+            wait.until(not(elementToBeClickable(xpath(submitButtonPath))));
         }
-
     }
 
     public void selectDataFromDateTime(String fieldName, String fieldData) {
-        WebElement dateTime = driver.findElement(xpath(format(dateTimePath, fieldName)));
-        wait
-                .until(visibilityOf(dateTime))
-                .sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData, TAB);
+        By dateTime = xpath(format(dateTimePath, fieldName));
+        wait.until(presenceOfElementLocated(dateTime));
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                requireNonNull(driver)
+                        .findElement(dateTime)
+                        .isEnabled());
+        driver.findElement(dateTime).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData, TAB);
     }
 
     public void checkRadioButton(String fieldData) {
-        WebElement radioButton = driver.findElement(xpath(format(radioButtonPath, fieldData)));
-        wait
-                .until((ExpectedCondition<Boolean>) driver -> radioButton.isEnabled());
-        radioButton.click();
+        By radioButton = xpath(format(radioButtonInputPath, fieldData));
+        wait.until(presenceOfElementLocated(radioButton));
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                requireNonNull(driver)
+                        .findElement(radioButton)
+                        .isEnabled());
+        driver.findElement(radioButton).click();
+    }
+
+    public void checkRadioButtonIsChecked(String fieldData) {
+        By radioButton = xpath(format(radioButtonInputPath, fieldData));
+        wait.until(presenceOfElementLocated(radioButton));
+        wait.until(attributeContains(radioButton, "class", "Mui-checked"));
     }
 
     public void checkCheckBox(String fieldName, String fieldData) {
+        By checkBox = xpath(format(checkboxInputPath, fieldName));
+        wait.until(presenceOfElementLocated(checkBox));
         if (fieldData.equalsIgnoreCase("так")) {
-            WebElement checkBox = driver.findElement(xpath(format(checkboxPath, fieldName)));
-            wait
-                    .until((ExpectedCondition<Boolean>) driver -> checkBox.isEnabled());
-            checkBox.click();
+            wait.until((ExpectedCondition<Boolean>) driver ->
+                    requireNonNull(driver)
+                            .findElement(checkBox)
+                            .isEnabled());
+            driver.findElement(checkBox).click();
         }
+    }
 
+    public void checkCheckBoxIsChecked(String fieldName, String fieldData) {
+        By checkBox = xpath(format(checkboxPath, fieldName));
+        wait.until(presenceOfElementLocated(checkBox));
+        if (fieldData.equalsIgnoreCase("так")) {
+            wait.until(attributeContains(checkBox, "class", "Mui-checked"));
+        }
     }
 
     public void checkFieldIsNotEmpty(String fieldName) {
+        By inputField = xpath(format(inputPath, fieldName));
+        wait.until(presenceOfElementLocated(inputField));
         wait.until((ExpectedCondition<Boolean>) d -> !requireNonNull(d)
-                .findElement(xpath(format(inputPath, fieldName)))
+                .findElement(inputField)
                 .getAttribute("value")
                 .isEmpty());
     }
 
-    public void checkTextareaText(String fieldName, String fieldData){
-        wait.until(textToBe(xpath(String.format(textAreaPath, fieldName)), fieldData));
+    public void checkTextareaText(String fieldName, String fieldData) {
+        By textarea = xpath(format(textAreaPath, fieldName));
+        wait.until(presenceOfElementLocated(textarea));
+        String[] textItems = driver.findElement(textarea)
+                .getText()
+                .split("\n");
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                Arrays.stream(textItems)
+                        .map(String::trim)
+                        .collect(Collectors.joining("\n"))
+                        .equalsIgnoreCase(fieldData.trim()));
     }
 
     public void setFieldsData(FieldData fieldData) {
@@ -136,19 +185,39 @@ public class TaskPage extends CommonTaskPage {
         }
     }
 
+    public void checkFieldsData(FieldData fieldData) {
+        switch (fieldData.getType()) {
+            case RADIOBUTTON:
+                checkRadioButtonIsChecked(fieldData.getValue());
+                break;
+            case CHECKBOX:
+                checkCheckBoxIsChecked(fieldData.getName(), fieldData.getValue());
+                break;
+            case INPUT:
+                checkFieldIsFilledWithData(format(this.inputPath, fieldData.getName()), fieldData.getValue());
+                break;
+            case SELECT:
+                checkFieldIsFilledWithData(new Select().getSelectXPath(fieldData.getName()), fieldData.getValue());
+                break;
+            case DATETIME:
+                checkFieldIsFilledWithData(format(dateTimePath, fieldData.getName()), fieldData.getValue());
+                break;
+        }
+    }
+
     public void addNewRow(String tableName) {
         wait
-                .until(elementToBeClickable(xpath(String.format(addNewRowButtonPath, tableName))))
+                .until(elementToBeClickable(xpath(format(addNewRowButtonPath, tableName))))
                 .click();
     }
 
     public void clickAddButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(String.format(addButton, gridName))))
+                .until(elementToBeClickable(xpath(format(addButtonPath, gridName))))
                 .click();
     }
 
-    public TaskPage clickSaveButton (){
+    public TaskPage clickSaveButton() {
         wait
                 .until(elementToBeClickable(saveButton))
                 .click();

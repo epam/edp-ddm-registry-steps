@@ -122,18 +122,31 @@ public class OfficerCabinetStepDefinitions {
         }
     }
 
+    @Коли("бачить передзаповнені поля із даними$")
+    public void userSeesFieldsWithData(List<FieldData> rows) {
+        for (FieldData fieldData : rows) {
+            new TaskPage()
+                    .checkFieldsData(fieldData);
+        }
+    }
+
+    @Коли("бачить форму {string} без кнопки \"Далі\"")
+    public void verifyDisplayFormNameWithoutSubmitButton (String formName) {
+        new TaskPage()
+                .checkTaskName(TaskPage.class, formName);
+    }
+
     @Та("натискає кнопку \"Далі\"")
     public void clickButton() {
         new TaskPage()
                 .submitForm();
     }
 
-// TODO "This step should be rewritten without using |";
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
     public void checkMessage(String formName, String messageLabel, String messageText){
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
-                .checkTextareaText(messageLabel, messageText.replace("|", ""));
+                .checkTextareaText(messageLabel, messageText);
     }
 
     @Коли("пересвідчується в правильному відображенні введених даних на формі {string}")
