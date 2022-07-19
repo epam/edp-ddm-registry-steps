@@ -50,6 +50,7 @@ public class Select extends BasePage {
         wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
         wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
         select.sendKeys(itemValue);
+        wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
         wait.until((ExpectedCondition<Boolean>) driver -> Objects.requireNonNull(driver).findElements(xpath(selectItems)).stream().allMatch(item -> item.getText().contains(itemValue)));
         select.sendKeys(ARROW_DOWN, ENTER);
         wait.until((ExpectedCondition<Boolean>) driver -> !select.getAttribute("value").isEmpty());
