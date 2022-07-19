@@ -108,12 +108,6 @@ public class OfficerCabinetStepDefinitions {
                 .checkSubmitButtonState(isEnabled);
     }
 
-    @Коли("поле {string} має значення заповнене автоматично")
-    public void verifyFieldIsFilledWithData(String fieldName) {
-        new TaskPage()
-                .checkFieldIsNotEmpty(fieldName);
-    }
-
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
         for (FieldData fieldData : rows) {
@@ -130,7 +124,7 @@ public class OfficerCabinetStepDefinitions {
         }
     }
 
-    @Коли("бачить форму {string} без кнопки \"Далі\"")
+    @Коли("бачить форму {string}")
     public void verifyDisplayFormNameWithoutSubmitButton (String formName) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName);
