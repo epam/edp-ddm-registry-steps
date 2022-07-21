@@ -163,6 +163,13 @@ public class OfficerCabinetStepDefinitions {
                 .checkTaskExistsByTaskName(taskName);
     }
 
+    @Тоді("послуга {string} має ідентифікатор {string}")
+    public void verifyServiceIdentifier(String processDefinitionName, String businessKey) {
+        new MyTasksPage()
+                .clickOnProvisionedTasksTab()
+                .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
+    }
+
     @І("додає запис до {string} таблиці із даними")
     public void userFillGridFieldsWithData(String gridName, List<FieldData> rows) {
         TaskPage taskPage = new TaskPage();

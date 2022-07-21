@@ -47,7 +47,16 @@ public class MyTasksPage extends OfficerBasePage {
         wait
                 .withMessage(String.format("Задача \"%s\" відсутня у черзі задач", taskName))
                 .until((ExpectedCondition<Boolean>) d -> new Table()
-                        .getRowFromTableByTaskName(taskName).size() > 0);
+                        .getRowsFromTableByTaskName(taskName).size() > 0);
+        wait = getDefaultWebDriverWait();
+        return this;
+    }
+
+    public MyTasksPage checkTaskExistsByProcessDefinitionNameAndBusinessKey(String processDefinitionName, String businessKey) {
+        wait
+                .withMessage(String.format("Послуга \"%s\" з ідентифікатором \"%s\" відсутня у черзі задач", processDefinitionName, businessKey))
+                .until((ExpectedCondition<Boolean>) d -> new Table()
+                        .getRowsFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey).size() > 0);
         wait = getDefaultWebDriverWait();
         return this;
     }
