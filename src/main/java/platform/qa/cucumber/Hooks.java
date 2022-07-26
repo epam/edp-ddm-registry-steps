@@ -21,13 +21,21 @@ import static platform.qa.base.providers.WebDriverProvider.closeWebDriver;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Scenario;
+import platform.qa.base.providers.WebDriverProvider;
 import platform.qa.base.utils.Screenshot;
+
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 
 public class Hooks {
 
     @After
     public void closeDriver(Scenario scenario) {
+        WebDriver driver = WebDriverProvider.getInstance();
         if (scenario.isFailed()) {
+            final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+            scenario.attach(screenshot, "image/png", "screenshot_" + scenario.getName());
             Screenshot.takeScreenshot();
         }
         closeWebDriver();
