@@ -23,9 +23,10 @@
         <platform-qa-utils.version>1.6.0.13</platform-qa-utils.version>
         <global-qa-entities.version>1.6.0.8</global-qa-entities.version>
 
-        <form-management-steps.version>1.6.0.51</form-management-steps.version>
-        <bpms-steps.version>1.6.0.51</bpms-steps.version>
-        <operation-steps.version>1.6.0.51</operation-steps.version>
+        <form-management-steps.version>1.6.0.52</form-management-steps.version>
+        <bpms-steps.version>1.6.0.52</bpms-steps.version>
+        <operation-steps.version>1.6.0.52</operation-steps.version>
+        <data-factory-common-steps.version>1.6.0.52</data-factory-common-steps.version>
     </properties>
 
     <dependencies>
@@ -69,6 +70,12 @@
             <artifactId>operation-steps</artifactId>
             <version>${operation-steps.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>platform.qa</groupId>
+            <artifactId>data-factory-common-steps</artifactId>
+            <version>${data-factory-common-steps.version}</version>
         </dependency>
 
         <dependency>

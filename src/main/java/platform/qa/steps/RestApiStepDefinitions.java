@@ -19,20 +19,28 @@ package platform.qa.steps;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.hamcrest.Matchers.in;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
+import lombok.SneakyThrows;
+
+import org.apache.http.HttpStatus;
+
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
+import platform.qa.data.common.SignatureSteps;
 import platform.qa.enums.Context;
 import platform.qa.rest.RestApiClient;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpStatus;
 
 /**
  * Cucumber step definitions for platform REST API
@@ -57,7 +65,7 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, result);
+        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, getContextWithHistory(result));
     }
 
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
@@ -71,7 +79,54 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, result);
+        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, getContextWithHistory(result));
+    }
+
+    @SneakyThrows
+    @Коли("користувач {string} виконує запит створення {string} з тілом запиту")
+    public void executePostApiWithParameters(String userName,
+                                             @NonNull String path,
+                                             @NonNull Map<String, String> queryParams) {
+        Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                                              registryConfig.getDigitalSignatureOps(userName),
+                                              registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+
+        String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .post(payload, path)
+                .then()
+                .statusCode(201);
+    }
+
+    @SneakyThrows
+    @Коли("користувач {string} виконує запит оновлення {string} з ідентифікатором {string} та тілом запиту")
+    public void executePutApiWithParameters(String userName,
+                                            @NonNull String path,
+                                            @NonNull String id,
+                                            @NonNull Map<String, String> queryParams) {
+        Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                                              registryConfig.getDigitalSignatureOps(userName),
+                                              registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+
+        String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .put(id, payload, path);
+    }
+
+    @Коли("користувач {string} виконує запит видалення {string} з ідентифікатором {string}")
+    public void executeDeleteApiWithId(String userName,
+                                       @NonNull String path,
+                                       @NonNull String id) {
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                                              registryConfig.getDigitalSignatureOps(userName),
+                                              registryConfig.getSignatureCeph()).signDeleteRequest(id);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .delete(id, path);
     }
 
     @Тоді("результат запиту містить наступні значення {string} у полі {string}")
@@ -92,5 +147,25 @@ public class RestApiStepDefinitions {
         return List.of(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED,
                 HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_RESET_CONTENT,
                 HttpStatus.SC_PARTIAL_CONTENT, HttpStatus.SC_MULTI_STATUS);
+    }
+
+    private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
+        Map<String, String> paramsWithIds = new HashMap<>(queryParams);
+        queryParams.entrySet().stream()
+                .filter(param -> param.getValue() == null)
+                .forEach(entry -> ((List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST))
+                        .stream()
+                        .filter(result -> result.containsKey(entry.getKey()))
+                        .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
+                );
+        return paramsWithIds;
+    }
+
+    private List<Map> getContextWithHistory(List<Map> result) {
+        List<Map> resultModifiable = new ArrayList<>(result);
+        List<Map> currentContext = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        if (currentContext != null)
+            resultModifiable.addAll(currentContext);
+        return resultModifiable;
     }
 }
