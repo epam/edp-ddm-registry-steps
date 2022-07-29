@@ -17,8 +17,8 @@
 package platform.qa.enums;
 
 public enum Context {
-    API_GET_RESULT_LIST,
-    API_POST_RESULT_LIST,
+    API_GET_RESULT_MAP_LIST,
+    API_POST_RESULT_MAP_LIST,
     BPMN_FILE_NAMES,
     BPMN_FORM_KEY_LIST,
     BPMN_PROCESS_NAME_LIST,
