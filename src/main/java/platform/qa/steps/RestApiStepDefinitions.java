@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.in;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
+import io.restassured.config.LogConfig;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -50,6 +51,7 @@ public class RestApiStepDefinitions {
         this.testContext = testContext;
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.registerParser("text/plain", Parser.JSON);
+        RestAssured.config().logConfig(LogConfig.logConfig().enableLoggingOfRequestAndResponseIfValidationFails().enablePrettyPrinting(Boolean.TRUE));
     }
 
     @Коли("користувач {string} виконує запит пошуку {string} з параметрами")
