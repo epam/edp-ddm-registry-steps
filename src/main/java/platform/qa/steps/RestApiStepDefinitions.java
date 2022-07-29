@@ -58,7 +58,9 @@ public class RestApiStepDefinitions {
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.registerParser("text/plain", Parser.JSON);
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(), new ErrorLoggingFilter());
-        RestAssured.config().logConfig(LogConfig.logConfig().enableLoggingOfRequestAndResponseIfValidationFails().enablePrettyPrinting(Boolean.TRUE));
+        RestAssured.config().logConfig(LogConfig.logConfig()
+                //.enableLoggingOfRequestAndResponseIfValidationFails()
+                .enablePrettyPrinting(Boolean.TRUE));
     }
 
     @Коли("користувач {string} виконує запит пошуку {string} з параметрами")
