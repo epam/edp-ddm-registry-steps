@@ -16,8 +16,11 @@
 
 package platform.qa.steps;
 
+import static java.util.Collections.singletonList;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.hamcrest.Matchers.in;
+import static platform.qa.enums.Context.API_GET_RESULT_LIST;
+import static platform.qa.enums.Context.API_POST_RESULT_LIST;
 
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
@@ -64,7 +67,7 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, getContextWithHistory(result));
+        testContext.getScenarioContext().setContext(API_GET_RESULT_LIST, getContextWithHistory(result, API_GET_RESULT_LIST));
     }
 
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
@@ -78,7 +81,7 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(Context.API_RESULT_LIST, getContextWithHistory(result));
+        testContext.getScenarioContext().setContext(API_GET_RESULT_LIST, getContextWithHistory(result, API_GET_RESULT_LIST));
     }
 
     @SneakyThrows
@@ -93,10 +96,16 @@ public class RestApiStepDefinitions {
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
-        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+        var result = new RestApiClient(registryConfig.getDataFactory(userName), signature)
                 .post(payload, path)
                 .then()
-                .statusCode(201);
+                .statusCode(201)
+                .extract()
+                .response()
+                .jsonPath()
+                .getMap("");
+        testContext.getScenarioContext().setContext(API_POST_RESULT_LIST, getContextWithHistory(singletonList(result),
+                API_POST_RESULT_LIST));
     }
 
     @SneakyThrows
@@ -132,7 +141,7 @@ public class RestApiStepDefinitions {
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
-        List<Map> context = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        List<Map> context = (List<Map>) testContext.getScenarioContext().getContext(API_POST_RESULT_LIST);
         var id = String.valueOf(context.stream()
                 .filter(map -> map.containsKey(idColumnName))
                 .findFirst().orElseThrow()
@@ -148,7 +157,7 @@ public class RestApiStepDefinitions {
 
     @Тоді("результат запиту містить наступні значення {string} у полі {string}")
     public void verifyApiHasValuesInField(String fieldValue, String fieldName) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(API_GET_RESULT_LIST);
         assertThatJson(actualResult)
                 .as("Такого поля не існує в json-і:")
                 .inPath("$.." + fieldName)
@@ -170,7 +179,7 @@ public class RestApiStepDefinitions {
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
-                .forEach(entry -> ((List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST))
+                .forEach(entry -> ((List<Map>) testContext.getScenarioContext().getContext(API_GET_RESULT_LIST))
                         .stream()
                         .filter(result -> result.containsKey(entry.getKey()))
                         .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
@@ -178,9 +187,9 @@ public class RestApiStepDefinitions {
         return paramsWithIds;
     }
 
-    private List<Map> getContextWithHistory(List<Map> result) {
+    private List<Map> getContextWithHistory(List<Map> result, Context context) {
         List<Map> resultModifiable = new ArrayList<>(result);
-        List<Map> currentContext = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        List<Map> currentContext = (List<Map>) testContext.getScenarioContext().getContext(context);
         if (currentContext != null)
             resultModifiable.addAll(currentContext);
         return resultModifiable;

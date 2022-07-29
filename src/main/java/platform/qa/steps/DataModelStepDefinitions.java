@@ -51,13 +51,13 @@ public class DataModelStepDefinitions {
 
     @Тоді("дата модель повертає точно заданий json нижче:$")
     public void verifyDataModelReturnJsonWithData(String expectedJsonText) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_LIST);
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель повертає json з файлу {string}")
     public void verifyDataModelReturnJsonFromFileWithData(String jsonFilePath) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_LIST);
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getJsonFileName(jsonFilePath);
         String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
@@ -66,14 +66,14 @@ public class DataModelStepDefinitions {
 
     @Тоді("дата модель повертає json, який містить точно наступні дані, ігноруючі невказані:$")
     public void verifyDataModelReturnJsonWithDataFromExpected(String expectedJsonText) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_LIST);
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель повертає точно заданий json з файлу {string}, ігноруючі невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String jsonFilePath) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_LIST);
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getJsonFileName(jsonFilePath);
         String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
