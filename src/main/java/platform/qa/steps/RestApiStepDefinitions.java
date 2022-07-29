@@ -19,17 +19,12 @@ package platform.qa.steps;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.hamcrest.Matchers.in;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-
-import org.apache.http.HttpStatus;
-
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
@@ -41,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Cucumber step definitions for platform REST API
@@ -89,8 +86,8 @@ public class RestApiStepDefinitions {
                                              @NonNull Map<String, String> queryParams) {
         Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                                              registryConfig.getDigitalSignatureOps(userName),
-                                              registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
@@ -108,8 +105,8 @@ public class RestApiStepDefinitions {
                                             @NonNull Map<String, String> queryParams) {
         Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                                              registryConfig.getDigitalSignatureOps(userName),
-                                              registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
@@ -122,8 +119,26 @@ public class RestApiStepDefinitions {
                                        @NonNull String path,
                                        @NonNull String id) {
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                                              registryConfig.getDigitalSignatureOps(userName),
-                                              registryConfig.getSignatureCeph()).signDeleteRequest(id);
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signDeleteRequest(id);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .delete(id, path);
+    }
+
+    @Тоді("користувач {string} чистить дані створені в поточному сценарії запитом {string} за назвою поля {string}")
+    public void executeDeleteApiByColumnName(String userName,
+                                             @NonNull String path,
+                                             @NonNull String idColumnName) {
+        List<Map> context = (List<Map>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST);
+        var id = String.valueOf(context.stream()
+                .filter(map -> map.containsKey(idColumnName))
+                .findFirst().orElseThrow()
+                .get(idColumnName));
+
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signDeleteRequest(id);
 
         new RestApiClient(registryConfig.getDataFactory(userName), signature)
                 .delete(id, path);
