@@ -26,6 +26,9 @@ import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
 import io.restassured.config.LogConfig;
+import io.restassured.filter.log.ErrorLoggingFilter;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -54,6 +57,7 @@ public class RestApiStepDefinitions {
         this.testContext = testContext;
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.registerParser("text/plain", Parser.JSON);
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(), new ErrorLoggingFilter());
         RestAssured.config().logConfig(LogConfig.logConfig().enableLoggingOfRequestAndResponseIfValidationFails().enablePrettyPrinting(Boolean.TRUE));
     }
 
