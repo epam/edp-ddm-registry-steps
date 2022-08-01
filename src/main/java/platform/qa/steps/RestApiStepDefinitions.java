@@ -39,9 +39,11 @@ import platform.qa.data.common.SignatureSteps;
 import platform.qa.enums.Context;
 import platform.qa.rest.RestApiClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -58,7 +60,6 @@ public class RestApiStepDefinitions {
         RestAssured.registerParser("text/plain", Parser.JSON);
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(), new ErrorLoggingFilter());
         RestAssured.config().logConfig(LogConfig.logConfig()
-                //.enableLoggingOfRequestAndResponseIfValidationFails()
                 .enablePrettyPrinting(Boolean.TRUE));
     }
 
@@ -113,7 +114,8 @@ public class RestApiStepDefinitions {
                 .getMap("");
 
         testContext.getScenarioContext().setContext(API_POST_RESULT_MAP_LIST,
-                getContextWithHistory(Map.of(path, singletonList(result)), API_POST_RESULT_MAP_LIST));
+                getContextWithDuplicatesHistory(singletonList(Map.of(path, singletonList(result))),
+                        API_POST_RESULT_MAP_LIST));
     }
 
     @SneakyThrows
@@ -149,25 +151,23 @@ public class RestApiStepDefinitions {
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
-        List<Map<String, Map>> context =
-                (List<Map<String, Map>>) testContext.getScenarioContext().getContext(API_POST_RESULT_MAP_LIST);
-        var id = String.valueOf(context.stream()
+        List<Map<String, List<Map>>> context =
+                (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_POST_RESULT_MAP_LIST);
+
+        List<String> ids = context.stream()
                 .filter(map -> map.containsKey(path))
-                .findFirst().orElseThrow()
-                .get(path)
-                .get(idColumnName));
+                .flatMap(stringListMap -> stringListMap.get(path).stream())
+                .filter(map -> map.containsKey(idColumnName))
+                .map(map -> String.valueOf(map.get(idColumnName)))
+                .collect(Collectors.toList());
 
-        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signDeleteRequest(id);
-
-        new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .delete(id, path);
+        ids.forEach(id -> executeDeleteApiWithId(userName, path, id));
     }
 
-    @Тоді("результат запиту містить наступні значення {string} у полі {string}")
-    public void verifyApiHasValuesInField(String fieldValue, String fieldName) {
-        var actualResult = (List<Map>) testContext.getScenarioContext().getContext(API_GET_RESULT_MAP_LIST);
+    @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
+    public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
+        var actualResult =
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_GET_RESULT_MAP_LIST)).get(path);
         assertThatJson(actualResult)
                 .as("Такого поля не існує в json-і:")
                 .inPath("$.." + fieldName)
@@ -203,6 +203,16 @@ public class RestApiStepDefinitions {
                 (Map<String, List<Map>>) testContext.getScenarioContext().getContext(context);
         if (currentContext != null)
             resultModifiable.putAll(currentContext);
+        return resultModifiable;
+    }
+
+    private List<Map<String, List<Map>>> getContextWithDuplicatesHistory(List<Map<String, List<Map>>> result,
+                                                                         Context context) {
+        List<Map<String, List<Map>>> resultModifiable = new ArrayList<>(result);
+        List<Map<String, List<Map>>> currentContext =
+                (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(context);
+        if (currentContext != null)
+            resultModifiable.addAll(currentContext);
         return resultModifiable;
     }
 }
