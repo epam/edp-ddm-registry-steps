@@ -97,7 +97,7 @@ public class RestApiStepDefinitions {
     public void executePostApiWithParameters(String userName,
                                              @NonNull String path,
                                              @NonNull Map<String, String> queryParams) {
-        Map<String, String> paramsWithIds = getParametersWithIds(path, queryParams);
+        Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
                 registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
@@ -124,7 +124,7 @@ public class RestApiStepDefinitions {
                                             @NonNull String path,
                                             @NonNull String id,
                                             @NonNull Map<String, String> queryParams) {
-        Map<String, String> paramsWithIds = getParametersWithIds(path, queryParams);
+        Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
                 registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
@@ -186,22 +186,23 @@ public class RestApiStepDefinitions {
     }
 
     /** Method to replace parameters such as ids with data get from context
-     * @param path - Get request path
      * @param queryParams - parameters for POST or PUT request
      * @return - parameters for ids for POST or PUT request inside body which were replaced by those which were
      * returned previously inside GET requests executed in scenario (get this from context)
      */
-    private Map<String, String> getParametersWithIds(String path, Map<String, String> queryParams) {
+    private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
         //Get results stored from Get requests during scenario run
-        List<Map> results =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_GET_RESULT_MAP_LIST)).get(path);
+        Map<String, List<Map>> results =
+                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_GET_RESULT_MAP_LIST);
         if (results == null || results.isEmpty()) return queryParams;
 
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> results
+                        .entrySet()
                         .stream()
+                        .flatMap(map->map.getValue().stream())
                         .filter(result -> result.containsKey(entry.getKey()))
                         .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
                 );
