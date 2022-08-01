@@ -59,8 +59,8 @@ public class TaskPage extends CommonTaskPage {
             "/following-sibling::div//button";
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
-    private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]" +
-            "/following-sibling::div//button";
+    private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
+            "following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
     private final String submitButtonPath = "//button[@type=\"submit\"]";
 
     public TaskPage() {
