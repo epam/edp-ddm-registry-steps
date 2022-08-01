@@ -26,7 +26,8 @@
         <form-management-steps.version>1.6.0.52</form-management-steps.version>
         <bpms-steps.version>1.6.0.52</bpms-steps.version>
         <operation-steps.version>1.6.0.52</operation-steps.version>
-        <data-factory-common-steps.version>1.6.0.52</data-factory-common-steps.version>
+        <!--temporary while 1.7.2 will arrive to envone-->
+        <data-factory-common-steps.version>1.6.0-ENVONE-VERSION-SNAPSHOT</data-factory-common-steps.version>
     </properties>
 
     <dependencies>
