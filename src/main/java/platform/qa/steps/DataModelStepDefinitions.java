@@ -49,7 +49,7 @@ public class DataModelStepDefinitions {
                 .isNotNull();
     }
 
-    @Тоді("дата модель за запитом {string} повертає точно заданий json нижче:$")
+    @Тоді("дата модель за запитом {string} повертає точно заданий json нижче:")
     public void verifyDataModelReturnJsonWithData(String path, String expectedJsonText) {
         var actualResult = (Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_MAP_LIST);
         assertThatJson(actualResult.get(path)).as("Дані не співпадають:").isEqualTo(expectedJsonText);
@@ -64,7 +64,7 @@ public class DataModelStepDefinitions {
         assertThatJson(actualResult.get(path)).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
-    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючі невказані:$")
+    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючі невказані:")
     public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
         var actualResult = (Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_GET_RESULT_MAP_LIST);
         assertThatJson(actualResult.get(path)).as("Дані не співпадають:")
