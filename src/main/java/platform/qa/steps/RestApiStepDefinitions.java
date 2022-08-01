@@ -144,7 +144,7 @@ public class RestApiStepDefinitions {
                 registryConfig.getSignatureCeph()).signDeleteRequest(id);
 
         new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .delete(id, path);
+                .delete(id, path + "/");
     }
 
     @Тоді("користувач {string} чистить дані створені в поточному сценарії запитом {string} за назвою поля {string}")
@@ -185,7 +185,9 @@ public class RestApiStepDefinitions {
                 HttpStatus.SC_PARTIAL_CONTENT, HttpStatus.SC_MULTI_STATUS);
     }
 
-    /** Method to replace parameters such as ids with data get from context
+    /**
+     * Method to replace parameters such as ids with data get from context
+     *
      * @param queryParams - parameters for POST or PUT request
      * @return - parameters for ids for POST or PUT request inside body which were replaced by those which were
      * returned previously inside GET requests executed in scenario (get this from context)
@@ -202,7 +204,7 @@ public class RestApiStepDefinitions {
                 .forEach(entry -> results
                         .entrySet()
                         .stream()
-                        .flatMap(map->map.getValue().stream())
+                        .flatMap(map -> map.getValue().stream())
                         .filter(result -> result.containsKey(entry.getKey()))
                         .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
                 );
@@ -210,7 +212,7 @@ public class RestApiStepDefinitions {
     }
 
     /**
-     * @param result - Executed API query result which contain tableName as a key and request response as a value
+     * @param result  - Executed API query result which contain tableName as a key and request response as a value
      * @param context - Scenario context name where this data stored in format Map<String, List<Map>>
      * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
@@ -224,8 +226,8 @@ public class RestApiStepDefinitions {
     }
 
     /**
-     * @param result - Executed API query result which contain List of tables where can be duplicates by tableName.
-     *               tableName as a key and request response as a value
+     * @param result  - Executed API query result which contain List of tables where can be duplicates by tableName.
+     *                tableName as a key and request response as a value
      * @param context - Scenario context name where this data stored in format List<Map<String, List<Map>>>
      * @return - List<Map<String, List<Map>>> with previously data exists in context + new one
      */
