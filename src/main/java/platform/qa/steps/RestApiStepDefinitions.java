@@ -158,7 +158,8 @@ public class RestApiStepDefinitions {
                 (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_RESULT_LIST_MAP);
 
         List<String> ids = context.stream()
-                .flatMap(stringListMap -> stringListMap.get(path).stream())
+                .flatMap(stringListMap -> stringListMap.entrySet().stream())
+                .flatMap(stringListEntry -> stringListEntry.getValue().stream())
                 .filter(map -> map.containsKey(idColumnName))
                 .map(map -> String.valueOf(map.get(idColumnName)))
                 .distinct()
