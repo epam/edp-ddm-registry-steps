@@ -150,7 +150,7 @@ public class RestApiStepDefinitions {
                 .delete(id, path + "/");
     }
 
-    @Тоді("користувач {string} видаляє дані створені в поточному сценарії за запитом {string} і назвою поля {string}")
+    @Тоді("користувач {string} виконує запит видалення {string} і назвою ідентифікатору {string}")
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
@@ -158,10 +158,10 @@ public class RestApiStepDefinitions {
                 (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_RESULT_LIST_MAP);
 
         List<String> ids = context.stream()
-                .filter(map -> map.containsKey(path))
                 .flatMap(stringListMap -> stringListMap.get(path).stream())
                 .filter(map -> map.containsKey(idColumnName))
                 .map(map -> String.valueOf(map.get(idColumnName)))
+                .distinct()
                 .collect(Collectors.toList());
 
         ids.forEach(id -> executeDeleteApiWithId(userName, path, id));
