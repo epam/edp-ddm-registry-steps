@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.CaseFormat;
 
 /**
  * Cucumber step definitions for platform REST API
@@ -67,8 +68,9 @@ public class RestApiStepDefinitions {
     public void executeGetApiWithParameters(String userName,
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
+        Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
-                .sendGetWithParams(path, queryParams)
+                .sendGetWithParams(path, paramsWithIds)
                 .extract()
                 .response()
                 .jsonPath()
@@ -113,8 +115,10 @@ public class RestApiStepDefinitions {
                 .jsonPath()
                 .getMap("");
 
+        Map resultWithUpdatedKeyName = getResultWithIdNameToCamelCase(path, new HashMap<>(result));
         testContext.getScenarioContext().setContext(API_RESULT_LIST_MAP,
-                getContextWithHistory(singletonList(Map.of(path, singletonList(result))), API_RESULT_LIST_MAP));
+                getContextWithHistory(singletonList(Map.of(path, singletonList(resultWithUpdatedKeyName))),
+                        API_RESULT_LIST_MAP));
     }
 
     @SneakyThrows
@@ -146,7 +150,7 @@ public class RestApiStepDefinitions {
                 .delete(id, path + "/");
     }
 
-    @Тоді("користувач {string} чистить дані створені в поточному сценарії запитом {string} за назвою поля {string}")
+    @Тоді("користувач {string} видаляє дані створені в поточному сценарії за запитом {string} і назвою поля {string}")
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
@@ -228,5 +232,20 @@ public class RestApiStepDefinitions {
         if (currentContext != null)
             resultModifiable.addAll(currentContext);
         return resultModifiable;
+    }
+
+    /**
+     * @param path   - Executed API query path
+     * @param result - Executed POST API query result which contain Map with key "id" and value
+     * @return - Executed POST API query result with replaced Map key from "id" to camelCase {path.concat(id)}
+     */
+    private Map getResultWithIdNameToCamelCase(String path, Map<Object, Object> result) {
+        String oldKey = String.valueOf(result.keySet().stream().findFirst().orElseThrow());
+        String newKey = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, String.format("%s-%s", path, oldKey));
+        if (!newKey.equals(oldKey)) {
+            result.put(newKey, result.get(oldKey));
+            result.remove(oldKey);
+        }
+        return result;
     }
 }
