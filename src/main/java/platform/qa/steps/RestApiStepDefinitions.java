@@ -179,7 +179,7 @@ public class RestApiStepDefinitions {
                 .delete(id, path + "/");
     }
 
-    @Тоді("користувач {string} виконує запит видалення {string} і назвою ідентифікатору {string}")
+    @Тоді("користувач {string} виконує запит {string} видалення даних створених в сценарії з назвою параметру {string}")
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
