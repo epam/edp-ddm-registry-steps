@@ -70,6 +70,7 @@ public class RestApiStepDefinitions {
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
         Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
+        if (paramsWithIds.containsValue(null)) return;
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, paramsWithIds)
                 .extract()
@@ -127,6 +128,7 @@ public class RestApiStepDefinitions {
                                              @NonNull String path,
                                              @NonNull Map<String, String> queryParams) {
         Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
+        if (paramsWithIds.containsValue(null)) return;
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
                 registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
@@ -157,6 +159,7 @@ public class RestApiStepDefinitions {
                                             @NonNull String id,
                                             @NonNull Map<String, String> queryParams) {
         Map<String, String> paramsWithIds = getParametersWithIds(queryParams);
+        if (paramsWithIds.containsValue(null)) return;
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
                 registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
