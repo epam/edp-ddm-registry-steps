@@ -16,10 +16,10 @@
 
 package platform.qa.steps;
 
-import static java.util.Collections.reverseOrder;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
 
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Тоді;
@@ -53,10 +53,7 @@ public class DataModelStepDefinitions {
     @Тоді("дата модель за запитом {string} повертає точно заданий json нижче:")
     public void verifyDataModelReturnJsonWithData(String path, String expectedJsonText) {
         var actualResult =
-                ((List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST_MAP))
-                .stream().filter(map -> map.containsKey(path))
-                .min(reverseOrder())
-                .orElseThrow()
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
                 .get(path);
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
@@ -64,10 +61,7 @@ public class DataModelStepDefinitions {
     @Тоді("дата модель за запитом {string} повертає json з файлу {string}")
     public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath) {
         var actualResult =
-                ((List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST_MAP))
-                .stream().filter(map -> map.containsKey(path))
-                .min(reverseOrder())
-                .orElseThrow()
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
                 .get(path);
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getJsonFileName(jsonFilePath);
@@ -78,10 +72,7 @@ public class DataModelStepDefinitions {
     @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючі невказані:")
     public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
         var actualResult =
-                ((List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST_MAP))
-                .stream().filter(map -> map.containsKey(path))
-                .min(reverseOrder())
-                .orElseThrow()
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
                 .get(path);
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
@@ -90,16 +81,29 @@ public class DataModelStepDefinitions {
     @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, ігноруючі невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath) {
         var actualResult =
-                ((List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(Context.API_RESULT_LIST_MAP))
-                .stream().filter(map -> map.containsKey(path))
-                .min(reverseOrder())
-                .orElseThrow()
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
                 .get(path);
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getJsonFileName(jsonFilePath);
         String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+    }
+
+    @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
+    public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
+        var actualResult =
+                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_UNIQUE))
+                        .get(path);
+        assertThatJson(actualResult)
+                .as("Такого поля не існує в json-і:")
+                .inPath("$.." + fieldName)
+                .isPresent();
+        assertThatJson(actualResult)
+                .as("Дані в полі не співпадають:")
+                .inPath("$.." + fieldName)
+                .isArray()
+                .contains(fieldValue);
     }
 
     private String getJsonFileName(String jsonFilePath) {

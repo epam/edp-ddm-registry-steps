@@ -16,11 +16,10 @@
 
 package platform.qa.steps;
 
-import static java.util.Collections.reverseOrder;
 import static java.util.Collections.singletonList;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.hamcrest.Matchers.in;
-import static platform.qa.enums.Context.API_RESULT_LIST_MAP;
+import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
+import static platform.qa.enums.Context.API_RESULTS_WITH_DUPLICATES;
 
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
@@ -39,11 +38,13 @@ import platform.qa.data.common.SignatureSteps;
 import platform.qa.enums.Context;
 import platform.qa.rest.RestApiClient;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
@@ -75,8 +76,11 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(API_RESULT_LIST_MAP,
-                getContextWithHistory(singletonList(Map.of(path, result)), API_RESULT_LIST_MAP));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_UNIQUE, Map.of(path, result));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_WITH_DUPLICATES,
+                getContextWithHistory(Map.of(path, result), API_RESULTS_WITH_DUPLICATES));
     }
 
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
@@ -90,8 +94,31 @@ public class RestApiStepDefinitions {
                 .response()
                 .jsonPath()
                 .getList("", Map.class);
-        testContext.getScenarioContext().setContext(API_RESULT_LIST_MAP,
-                getContextWithHistory(singletonList(Map.of(path, result)), API_RESULT_LIST_MAP));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_UNIQUE, Map.of(path, result));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_WITH_DUPLICATES,
+                getContextWithHistory(Map.of(path, result), API_RESULTS_WITH_DUPLICATES));
+    }
+
+    @Коли("виконується фільтрація результатів запиту {string} за параметрами")
+    public void filterApiResultsByParams(@NonNull String path, @NonNull Map<String, String> params) {
+        var context = (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+        Map<String, List<Map>> filteredResult = new HashMap<>();
+
+        if (MapUtils.isNotEmpty(context) && CollectionUtils.isNotEmpty(context.get(path))) {
+            filteredResult.put(path,
+                    context.get(path).stream()
+                            .filter(contextMap -> contextMap.entrySet().containsAll(params.entrySet()))
+                            .collect(Collectors.toList())
+            );
+
+            filteredResult.putAll(context.entrySet().stream()
+                    .filter(entry -> !entry.getKey().equals(path))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            testContext.getScenarioContext().setContext(API_RESULTS_WITH_DUPLICATES, filteredResult);
+        }
     }
 
     @SneakyThrows
@@ -116,9 +143,11 @@ public class RestApiStepDefinitions {
                 .getMap("");
 
         Map resultWithUpdatedKeyName = getResultWithIdNameToCamelCase(path, new HashMap<>(result));
-        testContext.getScenarioContext().setContext(API_RESULT_LIST_MAP,
-                getContextWithHistory(singletonList(Map.of(path, singletonList(resultWithUpdatedKeyName))),
-                        API_RESULT_LIST_MAP));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_UNIQUE, Map.of(path, resultWithUpdatedKeyName));
+
+        testContext.getScenarioContext().setContext(API_RESULTS_WITH_DUPLICATES, getContextWithHistory(Map.of(path,
+                singletonList(resultWithUpdatedKeyName)), API_RESULTS_WITH_DUPLICATES));
     }
 
     @SneakyThrows
@@ -154,11 +183,10 @@ public class RestApiStepDefinitions {
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
                                              @NonNull String idColumnName) {
-        List<Map<String, List<Map>>> context =
-                (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_RESULT_LIST_MAP);
+        Map<String, List<Map>> context =
+                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
 
-        List<String> ids = context.stream()
-                .flatMap(stringListMap -> stringListMap.entrySet().stream())
+        List<String> ids = context.entrySet().stream()
                 .flatMap(stringListEntry -> stringListEntry.getValue().stream())
                 .filter(map -> map.containsKey(idColumnName))
                 .map(map -> String.valueOf(map.get(idColumnName)))
@@ -166,25 +194,6 @@ public class RestApiStepDefinitions {
                 .collect(Collectors.toList());
 
         ids.forEach(id -> executeDeleteApiWithId(userName, path, id));
-    }
-
-    @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
-    public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
-        var actualResult =
-                ((List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_RESULT_LIST_MAP))
-                        .stream().filter(map -> map.containsKey(path))
-                        .min(reverseOrder())
-                        .orElseThrow()
-                        .get(path);
-        assertThatJson(actualResult)
-                .as("Такого поля не існує в json-і:")
-                .inPath("$.." + fieldName)
-                .isPresent();
-        assertThatJson(actualResult)
-                .as("Дані в полі не співпадають:")
-                .inPath("$.." + fieldName)
-                .isArray()
-                .contains(fieldValue);
     }
 
     private List<Integer> getSuccessStatuses() {
@@ -202,16 +211,15 @@ public class RestApiStepDefinitions {
      */
     private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
         //Get results stored from Get requests during scenario run
-        List<Map<String, List<Map>>> results =
-                (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(API_RESULT_LIST_MAP);
-        if (results == null || results.isEmpty()) return queryParams;
+        Map<String, List<Map>> results =
+                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+        if (MapUtils.isEmpty(results)) return queryParams;
 
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> results
-                        .stream()
-                        .flatMap(stringListMap -> stringListMap.entrySet().stream())
+                        .entrySet().stream()
                         .flatMap(map -> map.getValue().stream())
                         .filter(result -> result.containsKey(entry.getKey()))
                         .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
@@ -223,15 +231,21 @@ public class RestApiStepDefinitions {
      * @param result  - Executed API query result which contain List of tables where can be duplicates by tableName.
      *                tableName as a key and request response as a value
      * @param context - Scenario context name where this data stored in format List<Map<String, List<Map>>>
-     * @return - List<Map<String, List<Map>>> with previously data exists in context + new one
+     * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
-    private List<Map<String, List<Map>>> getContextWithHistory(List<Map<String, List<Map>>> result,
-                                                               Context context) {
-        List<Map<String, List<Map>>> resultModifiable = new ArrayList<>(result);
-        List<Map<String, List<Map>>> currentContext =
-                (List<Map<String, List<Map>>>) testContext.getScenarioContext().getContext(context);
-        if (currentContext != null)
-            resultModifiable.addAll(currentContext);
+    private Map<String, List<Map>> getContextWithHistory(Map<String, List<Map>> result,
+                                                         Context context) {
+        Map<String, List<Map>> resultModifiable = new HashMap<>(result);
+        Map<String, List<Map>> currentContext =
+                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(context);
+        if (currentContext != null) {
+            return Stream.concat(resultModifiable.entrySet().stream(), currentContext.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (v1ResultList, v2ResultList) -> {
+                                v1ResultList.addAll(v2ResultList);
+                                return v1ResultList;
+                            }));
+        }
         return resultModifiable;
     }
 
