@@ -233,7 +233,7 @@ public class RestApiStepDefinitions {
     /**
      * @param result  - Executed API query result which contain List of tables where can be duplicates by tableName.
      *                tableName as a key and request response as a value
-     * @param context - Scenario context name where this data stored in format List<Map<String, List<Map>>>
+     * @param context - Scenario context name where this data stored in format Map<String, List<Map>>
      * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
     private Map<String, List<Map>> getContextWithHistory(Map<String, List<Map>> result,
