@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Log4j2
 public class FileUtils {
 
+    public static final String TEST_RESOURCES_FOLDER = "src/test/resources/";
+
     public static String readFromFile(String path, String name) {
         try {
             Path pathToFile = Path.of(path, FilenameUtils.getName(name));
@@ -54,5 +56,30 @@ public class FileUtils {
                 .mapToObj(i -> readFileToObject(resourcePath, Path.of(resourcePath).getName(i).toString(), clazzValue
                         , mapper))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * @param filePath - path to file
+     * @return - name of file extracted from path
+     */
+    public static String getFileNameFromPath(String filePath) {
+        String jsonFileName = filePath;
+        if (filePath.contains("/")) {
+            jsonFileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        }
+        return jsonFileName;
+    }
+
+    /**
+     * @param filePath - partial path to file from steps
+     * @return - full path to file to src/test/resources+filePath folder
+     */
+    public static String getFilePath(String filePath) {
+        String endPath = "";
+        if (filePath.contains("/")) {
+            String endPathTmp = filePath.substring(0, filePath.lastIndexOf("/"));
+            endPath = endPathTmp.startsWith("/") ? endPathTmp.substring(1) : endPathTmp;
+        }
+        return TEST_RESOURCES_FOLDER + endPath;
     }
 }

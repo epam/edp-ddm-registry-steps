@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package platform.qa.base.utils;
+package platform.qa.base.convertors;
 
 import lombok.SneakyThrows;
 

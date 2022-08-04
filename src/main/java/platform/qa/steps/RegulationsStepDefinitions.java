@@ -25,7 +25,7 @@ import io.cucumber.java.uk.Тоді;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.api.FormManagementProviderApi;
 import platform.qa.api.ProcessDefinitionApi;
-import platform.qa.base.utils.Convertor;
+import platform.qa.base.convertors.Convertor;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;

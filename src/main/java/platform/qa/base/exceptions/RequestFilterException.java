@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package platform.qa.enums;
+package platform.qa.base.exceptions;
 
-public enum Context {
-    API_RESULTS,
-    BPMN_FILE_NAMES,
-    BPMN_FORM_KEY_LIST,
-    BPMN_PROCESS_NAME_LIST,
-    API_FORM_KEY_LIST,
-    API_PROCESS_NAME_LIST,
-    OFFICER_USER_LOGIN
+public class RequestFilterException extends RuntimeException {
+
+    public RequestFilterException(String message) {
+        super(message);
+    }
 }

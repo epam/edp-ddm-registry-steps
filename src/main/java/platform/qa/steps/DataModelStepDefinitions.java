@@ -19,7 +19,11 @@ package platform.qa.steps;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
+import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
+import static platform.qa.base.utils.FileUtils.getFileNameFromPath;
+import static platform.qa.base.utils.FileUtils.getFilePath;
+import static platform.qa.base.utils.RequestUtils.getLastRequest;
+import static platform.qa.enums.Context.API_RESULTS;
 
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Тоді;
@@ -27,10 +31,6 @@ import platform.qa.base.utils.FileUtils;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
-import platform.qa.enums.Context;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Cucumber step definitions for data factory search conditions
@@ -43,7 +43,8 @@ public class DataModelStepDefinitions {
         this.testContext = testContext;
     }
 
-    @Дано("користувачу {string} доступна розгорнута модель даних з переліком таблиць та згенерованими запитами доступу та пошуку даних")
+    @Дано("користувачу {string} доступна розгорнута модель даних з переліком таблиць та згенерованими запитами "
+            + "доступу та пошуку даних")
     public void verifyDataFactoryInit(String userName) {
         assertThat(registryConfig.getDataFactory(userName).getUrl())
                 .as("Модель даних не розгорнута!!!")
@@ -52,39 +53,37 @@ public class DataModelStepDefinitions {
 
     @Тоді("дата модель за запитом {string} повертає точно заданий json нижче:")
     public void verifyDataModelReturnJsonWithData(String path, String expectedJsonText) {
-        var actualResult =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
-                .get(path);
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель за запитом {string} повертає json з файлу {string}")
     public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath) {
-        var actualResult =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
-                .get(path);
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
         String filePath = getFilePath(jsonFilePath);
-        String jsonFileName = getJsonFileName(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючі невказані:")
     public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
-        var actualResult =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
-                .get(path);
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, ігноруючі невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath) {
-        var actualResult =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(Context.API_RESULTS_UNIQUE))
-                .get(path);
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
         String filePath = getFilePath(jsonFilePath);
-        String jsonFileName = getJsonFileName(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
@@ -92,9 +91,9 @@ public class DataModelStepDefinitions {
 
     @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
     public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
-        var actualResult =
-                ((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_UNIQUE))
-                        .get(path);
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
         assertThatJson(actualResult)
                 .as("Такого поля не існує в json-і:")
                 .inPath("$.." + fieldName)
@@ -104,22 +103,5 @@ public class DataModelStepDefinitions {
                 .inPath("$.." + fieldName)
                 .isArray()
                 .contains(fieldValue);
-    }
-
-    private String getJsonFileName(String jsonFilePath) {
-        String jsonFileName = jsonFilePath;
-        if (jsonFilePath.contains("/")) {
-            jsonFileName = jsonFilePath.substring(jsonFilePath.lastIndexOf("/") + 1);
-        }
-        return jsonFileName;
-    }
-
-    private String getFilePath(String jsonFilePath) {
-        String endPath = "";
-        if (jsonFilePath.contains("/")) {
-            String endPathTmp = jsonFilePath.substring(0, jsonFilePath.lastIndexOf("/"));
-            endPath = endPathTmp.startsWith("/") ? endPathTmp.substring(1) : endPathTmp;
-        }
-        return "src/test/resources/" + endPath;
     }
 }

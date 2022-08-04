@@ -41,19 +41,19 @@
         ],
       "attributes": {
       "drfo": [
-        "1010101014"
+        ""
         ],
       "edrpou": [
-        "34554362"
+        ""
         ],
       "fullName": [
-        "Сидоренко Василь Леонідович"
+        ""
         ]
       },
       "key": {
-        "name": "Key-6.dat",
-        "password": "MTIz",
-        "provider": "Тестовий ЦСК АТ \"ІІТ\""
+        "name": "",
+        "password": "",
+        "provider": ""
         }
     }
 ```
@@ -151,19 +151,19 @@
         ],
       "attributes": {
       "drfo": [
-        "1010101014"
+        ""
         ],
       "edrpou": [
-        "34554362"
+        ""
         ],
       "fullName": [
-        "Сидоренко Василь Леонідович"
+        ""
         ]
       },
       "key": {
-        "name": "Key-6.dat",
-        "password": "MTIz",
-        "provider": "Тестовий ЦСК АТ \"ІІТ\""
+        "name": "",
+        "password": "",
+        "provider": ""
         }
     }
 ```
