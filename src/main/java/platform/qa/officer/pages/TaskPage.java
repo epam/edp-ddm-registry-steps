@@ -30,11 +30,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
-import lombok.Getter;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
-import platform.qa.officer.panel.OfficerHeaderPanel;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -47,9 +46,6 @@ public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
     protected WebElement saveButton;
-
-    @Getter
-    private final OfficerHeaderPanel headerPanel = new OfficerHeaderPanel();
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -113,7 +109,7 @@ public class TaskPage extends CommonTaskPage {
                         .findElement(dateTime)
                         .isEnabled());
         driver.findElement(dateTime).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData, TAB);
-        getHeaderPanel().clickOnHeaderName();
+        wait.until(visibilityOfElementLocated(taskNameBy)).click();
     }
 
     public void checkRadioButton(String fieldData) {
