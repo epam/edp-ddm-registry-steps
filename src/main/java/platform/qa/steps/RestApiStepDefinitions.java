@@ -18,6 +18,7 @@ package platform.qa.steps;
 
 import static java.util.Collections.reverseOrder;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.in;
 import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
 import static platform.qa.enums.Context.API_RESULTS_WITH_DUPLICATES;
@@ -230,7 +231,7 @@ public class RestApiStepDefinitions {
                             .filter(result -> result.containsKey(entry.getKey()))
                             .filter(result -> result.get(entry.getKey()) != null)
                             .min(reverseOrder())
-                            .orElse(Map.of(entry.getKey(), ""));
+                            .orElse(singletonMap(entry.getKey(), null));
                     paramsWithIds.replace(entry.getKey(), resultMap.get(entry.getKey()).toString());
                 });
         return paramsWithIds;
