@@ -217,7 +217,7 @@ public class RestApiStepDefinitions {
     private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
         //Get results stored from Get requests during scenario run
         Map<String, LinkedList<Map>> results =
-                (Map<String, LinkedList<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+                convertToMapLinkedList((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES));
         if (MapUtils.isEmpty(results)) return queryParams;
 
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
@@ -243,11 +243,11 @@ public class RestApiStepDefinitions {
      * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
     private Map<String, LinkedList<Map>> getContextWithHistory(Map<String, List<Map>> result,
-                                                         Context context) {
-        Map<String, LinkedList<Map>> resultModifiable = new HashMap(result);
+                                                               Context context) {
+        Map<String, LinkedList<Map>> resultModifiable = new HashMap(convertToMapLinkedList(result));
         Map<String, LinkedList<Map>> currentContext =
-                (Map<String, LinkedList<Map>>) testContext.getScenarioContext().getContext(context);
-        if (currentContext != null) {
+                convertToMapLinkedList((Map<String, List<Map>>) testContext.getScenarioContext().getContext(context));
+        if (MapUtils.isNotEmpty(currentContext)) {
             return Stream.concat(resultModifiable.entrySet().stream(), currentContext.entrySet().stream())
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (v1ResultList, v2ResultList) -> {
@@ -256,6 +256,15 @@ public class RestApiStepDefinitions {
                             }));
         }
         return resultModifiable;
+    }
+
+    /**
+     * @param mapListToConvert - Map<String,List<Map>> Map with List which should be converted to LinkedList
+     * @return - Map<String, LinkedList<Map>> converted data
+     */
+    private Map<String, LinkedList<Map>> convertToMapLinkedList(Map<String, List<Map>> mapListToConvert) {
+        return mapListToConvert.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                entry -> new LinkedList<>(entry.getValue())));
     }
 
     /**
