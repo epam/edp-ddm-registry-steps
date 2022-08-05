@@ -25,23 +25,31 @@ import static org.openqa.selenium.Keys.HOME;
 import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.TAB;
 import static org.openqa.selenium.Keys.chord;
-import static org.openqa.selenium.support.ui.ExpectedConditions.*;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 
-import org.openqa.selenium.support.FindBy;
+import lombok.Getter;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import platform.qa.officer.panel.OfficerHeaderPanel;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
     protected WebElement saveButton;
+
+    @Getter
+    private final OfficerHeaderPanel headerPanel = new OfficerHeaderPanel();
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -105,6 +113,7 @@ public class TaskPage extends CommonTaskPage {
                         .findElement(dateTime)
                         .isEnabled());
         driver.findElement(dateTime).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData, TAB);
+        getHeaderPanel().clickOnHeaderName();
     }
 
     public void checkRadioButton(String fieldData) {
