@@ -16,6 +16,7 @@
 
 package platform.qa.steps;
 
+import static java.util.Collections.reverseOrder;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.in;
 import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
@@ -39,6 +40,7 @@ import platform.qa.enums.Context;
 import platform.qa.rest.RestApiClient;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -214,19 +216,23 @@ public class RestApiStepDefinitions {
      */
     private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
         //Get results stored from Get requests during scenario run
-        Map<String, List<Map>> results =
-                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+        Map<String, LinkedList<Map>> results =
+                (Map<String, LinkedList<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
         if (MapUtils.isEmpty(results)) return queryParams;
 
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
-                .forEach(entry -> results
-                        .entrySet().stream()
-                        .flatMap(map -> map.getValue().stream())
-                        .filter(result -> result.containsKey(entry.getKey()))
-                        .forEach(result -> paramsWithIds.replace(entry.getKey(), result.get(entry.getKey()).toString()))
-                );
+                .forEach(entry -> {
+                    Map resultMap = results
+                            .entrySet().stream()
+                            .flatMap(map -> map.getValue().stream())
+                            .filter(result -> result.containsKey(entry.getKey()))
+                            .filter(result -> result.get(entry.getKey()) != null)
+                            .min(reverseOrder())
+                            .orElse(Map.of(entry.getKey(), ""));
+                    paramsWithIds.replace(entry.getKey(), resultMap.get(entry.getKey()).toString());
+                });
         return paramsWithIds;
     }
 
@@ -236,11 +242,11 @@ public class RestApiStepDefinitions {
      * @param context - Scenario context name where this data stored in format Map<String, List<Map>>
      * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
-    private Map<String, List<Map>> getContextWithHistory(Map<String, List<Map>> result,
+    private Map<String, LinkedList<Map>> getContextWithHistory(Map<String, List<Map>> result,
                                                          Context context) {
-        Map<String, List<Map>> resultModifiable = new HashMap<>(result);
-        Map<String, List<Map>> currentContext =
-                (Map<String, List<Map>>) testContext.getScenarioContext().getContext(context);
+        Map<String, LinkedList<Map>> resultModifiable = new HashMap(result);
+        Map<String, LinkedList<Map>> currentContext =
+                (Map<String, LinkedList<Map>>) testContext.getScenarioContext().getContext(context);
         if (currentContext != null) {
             return Stream.concat(resultModifiable.entrySet().stream(), currentContext.entrySet().stream())
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
