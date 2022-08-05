@@ -263,6 +263,8 @@ public class RestApiStepDefinitions {
      * @return - Map<String, LinkedList<Map>> converted data
      */
     private Map<String, LinkedList<Map>> convertToMapLinkedList(Map<String, List<Map>> mapListToConvert) {
+        if (MapUtils.isEmpty(mapListToConvert))
+            return new HashMap<>();
         return mapListToConvert.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 entry -> new LinkedList<>(entry.getValue())));
     }
