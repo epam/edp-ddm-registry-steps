@@ -16,6 +16,7 @@
 
 package platform.qa.steps;
 
+import static java.util.Collections.reverseOrder;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.in;
 import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
@@ -31,6 +32,7 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.parsing.Parser;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
@@ -39,6 +41,7 @@ import platform.qa.enums.Context;
 import platform.qa.rest.RestApiClient;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
@@ -53,6 +57,7 @@ import com.google.common.base.CaseFormat;
 /**
  * Cucumber step definitions for platform REST API
  */
+@Log4j2
 public class RestApiStepDefinitions {
     private RegistryConfig registryConfig = MasterConfig.getInstance().getRegistryConfig();
     private TestContext testContext;
@@ -105,8 +110,9 @@ public class RestApiStepDefinitions {
 
     @Коли("виконується фільтрація результатів запиту {string} за параметрами")
     public void filterApiResultsByParams(@NonNull String path, @NonNull Map<String, String> params) {
-        var context = (Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
-        Map<String, List<Map>> filteredResult = new HashMap<>();
+        var context =
+                (LinkedHashMap<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+        LinkedHashMap<String, List<Map>> filteredResult = new LinkedHashMap<>();
 
         if (MapUtils.isNotEmpty(context) && CollectionUtils.isNotEmpty(context.get(path))) {
             filteredResult.put(path,
@@ -119,6 +125,7 @@ public class RestApiStepDefinitions {
                     .filter(entry -> !entry.getKey().equals(path))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
+            log.info("Filtered Results are: \n" + StringUtils.join(filteredResult));
             testContext.getScenarioContext().setContext(API_RESULTS_WITH_DUPLICATES, filteredResult);
         }
     }
@@ -215,23 +222,23 @@ public class RestApiStepDefinitions {
      */
     private Map<String, String> getParametersWithIds(Map<String, String> queryParams) {
         //Get results stored from Get requests during scenario run
-        Map<String, LinkedList<Map>> results =
-                convertToMapLinkedList((Map<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES));
+        LinkedHashMap<String, List<Map>> results =
+                (LinkedHashMap<String, List<Map>>) testContext.getScenarioContext().getContext(API_RESULTS_WITH_DUPLICATES);
+
         if (MapUtils.isEmpty(results)) return queryParams;
 
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> {
-                    LinkedList<Map> resultMap = results
+                    Map resultMap = results
                             .entrySet().stream()
                             .flatMap(map -> map.getValue().stream())
                             .filter(result -> result.containsKey(entry.getKey()))
                             .filter(result -> result.get(entry.getKey()) != null)
-                            .collect(Collectors.toCollection(LinkedList::new));
-                    Object newValue = resultMap.getLast().get(entry.getKey());
-                    if (newValue != null)
-                        paramsWithIds.replace(entry.getKey(), String.valueOf(newValue));
+                            .reduce(new LinkedHashMap<>(), (first, second) -> second);
+                    if (resultMap.get(entry.getKey()) != null)
+                        paramsWithIds.replace(entry.getKey(), String.valueOf(resultMap.get(entry.getKey())));
                 });
         return paramsWithIds;
     }
@@ -242,31 +249,23 @@ public class RestApiStepDefinitions {
      * @param context - Scenario context name where this data stored in format Map<String, List<Map>>
      * @return - Map<String, List<Map>> with previously data exists in context + new one
      */
-    private Map<String, LinkedList<Map>> getContextWithHistory(Map<String, List<Map>> result,
-                                                               Context context) {
-        Map<String, LinkedList<Map>> resultModifiable = new HashMap(convertToMapLinkedList(result));
-        Map<String, LinkedList<Map>> currentContext =
-                convertToMapLinkedList((Map<String, List<Map>>) testContext.getScenarioContext().getContext(context));
+    private LinkedHashMap<String, LinkedList<Map>> getContextWithHistory(Map<String, List<Map>> result,
+                                                                         Context context) {
+        LinkedHashMap<String, LinkedList<Map>> resultModifiable = new LinkedHashMap(result);
+        LinkedHashMap<String, List<Map>> currentContext =
+                (LinkedHashMap<String, List<Map>>) testContext.getScenarioContext().getContext(context);
         if (MapUtils.isNotEmpty(currentContext)) {
-            return Stream.concat(resultModifiable.entrySet().stream(), currentContext.entrySet().stream())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+            return new LinkedHashMap<>(Stream.concat(resultModifiable.entrySet().stream(),
+                            currentContext.entrySet().stream())
+                    .collect(Collectors.toMap(entry -> String.valueOf(entry.getKey()),
+                            entry -> new LinkedList<>(entry.getValue()),
                             (v1ResultList, v2ResultList) -> {
                                 v1ResultList.addAll(v2ResultList);
+                                v1ResultList.sort(reverseOrder());
                                 return v1ResultList;
-                            }));
+                            })));
         }
         return resultModifiable;
-    }
-
-    /**
-     * @param mapListToConvert - Map<String,List<Map>> Map with List which should be converted to LinkedList
-     * @return - Map<String, LinkedList<Map>> converted data
-     */
-    private Map<String, LinkedList<Map>> convertToMapLinkedList(Map<String, List<Map>> mapListToConvert) {
-        if (MapUtils.isEmpty(mapListToConvert))
-            return new HashMap<>();
-        return mapListToConvert.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                entry -> new LinkedList<>(entry.getValue())));
     }
 
     /**

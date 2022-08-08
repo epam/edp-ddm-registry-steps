@@ -18,17 +18,16 @@ package platform.qa.cucumber;
 
 import platform.qa.enums.Context;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Class to pass context between scenarios
  */
 public class ScenarioContext {
-    private Map<String, Object> scenarioContext;
+    private LinkedHashMap<String, Object> scenarioContext;
 
     public ScenarioContext() {
-        scenarioContext = new HashMap<>();
+        scenarioContext = new LinkedHashMap<>();
     }
 
     public void setContext(Context key, Object value) {
