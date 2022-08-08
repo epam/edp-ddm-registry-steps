@@ -232,7 +232,8 @@ public class RestApiStepDefinitions {
                             .filter(result -> result.get(entry.getKey()) != null)
                             .min(reverseOrder())
                             .orElse(singletonMap(entry.getKey(), null));
-                    paramsWithIds.replace(entry.getKey(), String.valueOf(resultMap.get(entry.getKey())));
+                    if (resultMap.get(entry.getKey()) != null)
+                        paramsWithIds.replace(entry.getKey(), String.valueOf(resultMap.get(entry.getKey())));
                 });
         return paramsWithIds;
     }
