@@ -17,7 +17,6 @@
 package platform.qa.steps;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.in;
 import static platform.qa.enums.Context.API_RESULTS_UNIQUE;
 import static platform.qa.enums.Context.API_RESULTS_WITH_DUPLICATES;
@@ -224,15 +223,15 @@ public class RestApiStepDefinitions {
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> {
-                    Map resultMap = results
+                    LinkedList<Map> resultMap = results
                             .entrySet().stream()
                             .flatMap(map -> map.getValue().stream())
                             .filter(result -> result.containsKey(entry.getKey()))
                             .filter(result -> result.get(entry.getKey()) != null)
-                            .reduce((first, second) -> second)
-                            .orElse(singletonMap(entry.getKey(), null));
-                    if (resultMap.get(entry.getKey()) != null)
-                        paramsWithIds.replace(entry.getKey(), String.valueOf(resultMap.get(entry.getKey())));
+                            .collect(Collectors.toCollection(LinkedList::new));
+                    Object newValue = resultMap.getLast().get(entry.getKey());
+                    if (newValue != null)
+                        paramsWithIds.replace(entry.getKey(), String.valueOf(newValue));
                 });
         return paramsWithIds;
     }
