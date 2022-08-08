@@ -231,12 +231,13 @@ public class RestApiStepDefinitions {
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> results
-                        .forEach((key, value) -> value.stream()
-                                .filter(result -> result.containsKey(entry.getKey()) && result.get(entry.getKey()) != null)
-                                .forEach(map -> paramsWithIds.replace(entry.getKey(),
-                                        String.valueOf(map.get(entry.getKey()))))));
+                        .forEach((key, value) -> value
+                                .forEach(map -> {
+                                    if (map.get(entry.getKey()) != null)
+                                        paramsWithIds.replace(entry.getKey(), String.valueOf(map.get(entry.getKey())));
+                                })));
         return paramsWithIds;
-    }
+}
 
     /**
      * @param result  - Executed API query result which contain List of tables where can be duplicates by tableName.
