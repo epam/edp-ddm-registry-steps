@@ -231,11 +231,10 @@ public class RestApiStepDefinitions {
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(entry -> results
-                        .entrySet().stream()
-                        .flatMap(map -> map.getValue().stream())
-                        .filter(result -> result.containsKey(entry.getKey()))
-                        .filter(result -> result.get(entry.getKey()) != null)
-                        .forEach(map -> paramsWithIds.replace(entry.getKey(), String.valueOf(map.get(entry.getKey())))));
+                        .forEach((key, value) -> value.stream()
+                                .filter(result -> result.containsKey(entry.getKey()) && result.get(entry.getKey()) != null)
+                                .forEach(map -> paramsWithIds.replace(entry.getKey(),
+                                        String.valueOf(map.get(entry.getKey()))))));
         return paramsWithIds;
     }
 
