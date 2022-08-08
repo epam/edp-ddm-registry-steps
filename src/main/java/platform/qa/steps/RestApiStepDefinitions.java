@@ -230,16 +230,12 @@ public class RestApiStepDefinitions {
         Map<String, String> paramsWithIds = new HashMap<>(queryParams);
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
-                .forEach(entry -> {
-                    Map resultMap = results
-                            .entrySet().stream()
-                            .flatMap(map -> map.getValue().stream())
-                            .filter(result -> result.containsKey(entry.getKey()))
-                            .filter(result -> result.get(entry.getKey()) != null)
-                            .reduce(new LinkedHashMap<>(), (first, second) -> second);
-                    if (resultMap.get(entry.getKey()) != null)
-                        paramsWithIds.replace(entry.getKey(), String.valueOf(resultMap.get(entry.getKey())));
-                });
+                .forEach(entry -> results
+                        .entrySet().stream()
+                        .flatMap(map -> map.getValue().stream())
+                        .filter(result -> result.containsKey(entry.getKey()))
+                        .filter(result -> result.get(entry.getKey()) != null)
+                        .forEach(map -> paramsWithIds.replace(entry.getKey(), String.valueOf(map.get(entry.getKey())))));
         return paramsWithIds;
     }
 
