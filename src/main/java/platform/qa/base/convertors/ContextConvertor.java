@@ -18,6 +18,7 @@ package platform.qa.base.convertors;
 
 import platform.qa.entities.context.Request;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,44 @@ public class ContextConvertor {
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
                     .map(item -> (Request) item)
+                    .collect(Collectors.toList());
+        }
+        return convertedContext;
+    }
+
+    /**
+     * @param context - Scenario context to convert
+     * @return - converted context to List<File>
+     */
+    public static List<File> convertToFileList(Object context) {
+        List<File> convertedContext = new ArrayList<>();
+        if (context instanceof File) {
+            convertedContext = new ArrayList<>() {{
+                add((File) context);
+            }};
+        }
+        if (context instanceof List<?>) {
+            convertedContext = ((List<?>) context).stream()
+                    .map(item -> (File) item)
+                    .collect(Collectors.toList());
+        }
+        return convertedContext;
+    }
+
+    /**
+     * @param context - Scenario context to convert
+     * @return - converted context to List<String>
+     */
+    public static List<String> convertToStringList(Object context) {
+        List<String> convertedContext = new ArrayList<>();
+        if (context instanceof String) {
+            convertedContext = new ArrayList<>() {{
+                add((String) context);
+            }};
+        }
+        if (context instanceof List<?>) {
+            convertedContext = ((List<?>) context).stream()
+                    .map(item -> (String) item)
                     .collect(Collectors.toList());
         }
         return convertedContext;

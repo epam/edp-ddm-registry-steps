@@ -18,6 +18,7 @@ package platform.qa.cucumber;
 
 
 import static platform.qa.base.providers.WebDriverProvider.closeWebDriver;
+import static platform.qa.base.providers.WebDriverProvider.isWebDriverOpened;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Scenario;
@@ -32,12 +33,12 @@ public class Hooks {
 
     @After
     public void closeDriver(Scenario scenario) {
-        WebDriver driver = WebDriverProvider.getInstance();
-        if (scenario.isFailed()) {
+        if (scenario.isFailed() && isWebDriverOpened()) {
+            WebDriver driver = WebDriverProvider.getInstance();
             final byte[] screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
             scenario.attach(screenshot, "image/png", "screenshot_" + scenario.getName());
             Screenshot.takeScreenshot();
+            closeWebDriver();
         }
-        closeWebDriver();
     }
 }

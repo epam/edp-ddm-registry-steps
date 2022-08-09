@@ -18,6 +18,8 @@ package platform.qa.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static platform.qa.base.convertors.ContextConvertor.convertToFileList;
+import static platform.qa.base.convertors.ContextConvertor.convertToStringList;
 
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Коли;
@@ -62,7 +64,7 @@ public class RegulationsStepDefinitions {
         List<File> bpmnFiles;
         Object bpmn = testContext.getScenarioContext().getContext(Context.BPMN_FILE_NAMES);
         if (!Objects.isNull(bpmn)) {
-            bpmnFiles = (List<File>) bpmn;
+            bpmnFiles = convertToFileList(bpmn);
         } else {
             bpmnFiles = getBpmnFilesFromGerritFolder("bpmn", ".bpmn");
             testContext.getScenarioContext().setContext(Context.BPMN_FILE_NAMES, bpmnFiles);
@@ -70,9 +72,10 @@ public class RegulationsStepDefinitions {
         assertThat(bpmnFiles).as("Регламент не розгорнувся:").hasSizeGreaterThan(0);
     }
 
-    @Коли("адміністратор регламенту {string} отримує наявні бізнес процеси та відповідні їм форми через сервіси платформи")
+    @Коли("адміністратор регламенту {string} отримує наявні бізнес процеси та відповідні їм форми через сервіси "
+            + "платформи")
     public void getProcessesAndForms(String userName) {
-        List<File> bpmnFiles = (List<File>) testContext.getScenarioContext().getContext(Context.BPMN_FILE_NAMES);
+        List<File> bpmnFiles = convertToFileList(testContext.getScenarioContext().getContext(Context.BPMN_FILE_NAMES));
         assertThat(bpmnFiles).as("В розгорнутому регламенті немає списку bpmn файлів процесів:").hasSizeGreaterThan(0);
 
         List<String> formKeys = getFormKeysFromBpmnFiles(bpmnFiles);
@@ -105,14 +108,14 @@ public class RegulationsStepDefinitions {
     @Тоді("він переконується, що бізнес процеси та їх форми доступні кінцевому користувачу")
     public void checkIfAllBpmnFormsWereDeployed() {
         List<String> expectedForms =
-                (List<String>) testContext.getScenarioContext().getContext(Context.BPMN_FORM_KEY_LIST);
+                convertToStringList(testContext.getScenarioContext().getContext(Context.BPMN_FORM_KEY_LIST));
         List<String> actualForms =
-                (List<String>) testContext.getScenarioContext().getContext(Context.API_FORM_KEY_LIST);
+                convertToStringList(testContext.getScenarioContext().getContext(Context.API_FORM_KEY_LIST));
 
         List<String> expectedProcesses =
-                (List<String>) testContext.getScenarioContext().getContext(Context.BPMN_PROCESS_NAME_LIST);
+                convertToStringList(testContext.getScenarioContext().getContext(Context.BPMN_PROCESS_NAME_LIST));
         List<String> actualProcesses =
-                (List<String>) testContext.getScenarioContext().getContext(Context.API_PROCESS_NAME_LIST);
+                convertToStringList(testContext.getScenarioContext().getContext(Context.API_PROCESS_NAME_LIST));
 
         assertSoftly(softly -> {
             softly.assertThat(actualForms).as("Кількість розгорнутих форм на оточенні менша ніж в "
@@ -147,7 +150,7 @@ public class RegulationsStepDefinitions {
         List<String> processNames = bpmnFiles.stream()
                 .map(file -> Convertor.convertPartOfXmlFileToObject(file, "process", BusinessProcess[].class))
                 .flatMap(Arrays::stream)
-                .map(businessProcess -> businessProcess.getName())
+                .map(BusinessProcess::getName)
                 .collect(Collectors.toList());
         assertThat(processNames).as("Файлів процесів немає в папці target:").hasSizeGreaterThan(0);
 

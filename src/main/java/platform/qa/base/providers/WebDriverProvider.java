@@ -60,6 +60,10 @@ public class WebDriverProvider {
         }
     }
 
+    public static boolean isWebDriverOpened() {
+        return instance != null;
+    }
+
     public static void closeWebDriver() {
         if (instance != null) {
             try {
