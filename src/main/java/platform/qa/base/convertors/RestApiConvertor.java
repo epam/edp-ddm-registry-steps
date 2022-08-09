@@ -16,7 +16,6 @@
 
 package platform.qa.base.convertors;
 
-import platform.qa.base.exceptions.RequestFilterException;
 import platform.qa.entities.context.Request;
 
 import java.util.HashMap;
@@ -42,10 +41,9 @@ public class RestApiConvertor {
                 .forEach(param -> {
                     var lastRequest = context.stream()
                             .filter(request -> request.isResultContainsKey(param.getKey()))
-                            .max(Request::compareTo)
-                            .orElseThrow(() -> new RequestFilterException(""));
-                    paramsWithIds.replace(param.getKey(),
-                            String.valueOf(lastRequest.getResultValueByKey(param.getKey())));
+                            .max(Request::compareTo);
+                    lastRequest.ifPresent(request -> paramsWithIds.replace(param.getKey(),
+                            String.valueOf(request.getResultValueByKey(param.getKey()))));
                 });
         return paramsWithIds;
     }
