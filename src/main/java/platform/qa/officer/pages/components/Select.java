@@ -18,6 +18,7 @@ package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
 import static org.openqa.selenium.By.xpath;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import platform.qa.base.BasePage;
@@ -45,10 +46,11 @@ public class Select extends BasePage {
         WebElement select = driver.findElement(xpath(selectXPath));
         wait.until(ExpectedConditions.elementToBeClickable(select))
                 .click();
+        wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
         wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
         wait.until((ExpectedCondition<Boolean>) driver -> Objects.requireNonNull(driver)
                 .findElements(xpath(selectItems)).stream()
-                .anyMatch(item -> item.getText().startsWith(itemValue)));
+                .noneMatch(item -> item.getText().isEmpty()));
         WebElement element = driver.findElements(xpath(selectItems)).stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
