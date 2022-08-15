@@ -27,7 +27,7 @@ public class LoginPage extends OfficerBasePage {
 
     @FindBy(xpath = "//button[@data-xpath='loginButton']")
     WebElement authButton;
-    String loginUrl = baseUrl + "officer/login";
+    String loginUrl = baseUrl + "login";
 
     public AuthWithCesPage openAuthWithCesPage() {
         return openPage()
