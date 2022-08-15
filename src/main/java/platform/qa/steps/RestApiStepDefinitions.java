@@ -76,7 +76,9 @@ public class RestApiStepDefinitions {
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, String> paramsWithIds = getParametersWithIds(queryParams, context);
+        Map<String, String> paramsWithIds =
+                getParametersWithIds(queryParams, context).entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
         if (paramsWithIds.containsValue(null)) return;
 
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
@@ -126,7 +128,7 @@ public class RestApiStepDefinitions {
                                              @NonNull String path,
                                              @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, String> paramsWithIds = getParametersWithIds(queryParams, context);
+        Map<String, Object> paramsWithIds = getParametersWithIds(queryParams, context);
 
         if (paramsWithIds.containsValue(null)) return;
 
@@ -159,7 +161,7 @@ public class RestApiStepDefinitions {
                                             @NonNull String id,
                                             @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, String> paramsWithIds = getParametersWithIds(queryParams, context);
+        Map<String, Object> paramsWithIds = getParametersWithIds(queryParams, context);
 
         if (paramsWithIds.containsValue(null)) return;
 
@@ -207,8 +209,6 @@ public class RestApiStepDefinitions {
     public void clearContext() {
         testContext.getScenarioContext().setContext(API_RESULTS, new ArrayList<Request>());
     }
-
-
 
     private List<Integer> getSuccessStatuses() {
         return List.of(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED,

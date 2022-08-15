@@ -18,7 +18,6 @@ package platform.qa.base.convertors;
 
 import platform.qa.entities.context.Request;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +34,11 @@ public class RestApiConvertor {
      * @param queryParams - parameters for POST or PUT request
      * @return - parameters with values for such parameters as id got from previous requests results from context
      */
-    public static Map<String, String> getParametersWithIds(Map<String, String> queryParams, List<Request> context) {
-        if (CollectionUtils.isEmpty(context)) return queryParams;
+    public static Map<String, Object> getParametersWithIds(Map<String, String> queryParams, List<Request> context) {
+        Map<String, Object> paramsWithIds = new HashMap<>(queryParams);
 
-        Map<String, String> paramsWithIds = new HashMap<>(queryParams);
+        if (CollectionUtils.isEmpty(context)) return paramsWithIds;
+
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() == null)
                 .forEach(param -> {
@@ -58,8 +58,8 @@ public class RestApiConvertor {
                             .collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(requests)) {
                         paramsWithIds.replace(param.getKey(),
-                                Arrays.toString(requests.stream()
-                                        .map(request -> String.format("\"%s\"", request.getResultValueByKey(value))).toArray()));
+                                requests.stream()
+                                        .map(request -> String.format("\"%s\"", request.getResultValueByKey(value))).collect(Collectors.toList()));
                     }
                 });
         return paramsWithIds;
