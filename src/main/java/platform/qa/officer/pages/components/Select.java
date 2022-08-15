@@ -63,10 +63,14 @@ public class Select extends BasePage {
     }
 
     private void checkValueSelected(String itemName) {
-        String selectInputXPath = format(selectDropdownInputPath, itemName);
+        String selectInputXPath = getSelectInputXPath(itemName);
         wait.until((ExpectedCondition<Boolean>) driver -> !requireNonNull(driver)
                 .findElement(xpath(selectInputXPath))
                 .getAttribute("value")
                 .isEmpty());
+    }
+
+    public String getSelectInputXPath(String itemName) {
+        return format(selectDropdownInputPath, itemName);
     }
 }

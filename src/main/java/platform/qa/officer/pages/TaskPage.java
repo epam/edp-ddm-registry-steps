@@ -202,7 +202,7 @@ public class TaskPage extends CommonTaskPage {
                 checkFieldIsFilledWithData(format(this.inputPath, fieldData.getName()), fieldData.getValue());
                 break;
             case SELECT:
-                checkFieldIsFilledWithData(new Select().getSelectXPath(fieldData.getName()), fieldData.getValue());
+                checkFieldIsFilledWithData(new Select().getSelectInputXPath(fieldData.getName()), fieldData.getValue());
                 break;
             case DATETIME:
                 checkFieldIsFilledWithData(format(dateTimePath, fieldData.getName()), fieldData.getValue());
