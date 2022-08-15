@@ -18,6 +18,7 @@ package platform.qa.base.convertors;
 
 import platform.qa.entities.context.Request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +58,8 @@ public class RestApiConvertor {
                             .collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(requests)) {
                         paramsWithIds.replace(param.getKey(),
-                                StringUtils.join(requests.stream()
-                                        .map(request -> request.getResultValueByKey(value))
-                                        .collect(Collectors.toList()), ","));
+                                Arrays.toString(requests.stream()
+                                        .map(request -> request.getResultValueByKey(value)).toArray()));
                     }
                 });
         return paramsWithIds;
