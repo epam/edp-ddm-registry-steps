@@ -59,7 +59,7 @@ public class RestApiConvertor {
                     if (CollectionUtils.isNotEmpty(requests)) {
                         paramsWithIds.replace(param.getKey(),
                                 requests.stream()
-                                        .map(request -> String.format("\"%s\"", request.getResultValueByKey(value))).collect(Collectors.toList()));
+                                        .map(request -> request.getResultValueByKey(value)).collect(Collectors.toList()));
                     }
                 });
         return paramsWithIds;
