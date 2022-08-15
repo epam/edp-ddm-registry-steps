@@ -21,7 +21,9 @@ import platform.qa.entities.context.Request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 
 public class RestApiConvertor {
@@ -44,6 +46,21 @@ public class RestApiConvertor {
                             .max(Request::compareTo);
                     lastRequest.ifPresent(request -> paramsWithIds.replace(param.getKey(),
                             String.valueOf(request.getResultValueByKey(param.getKey()))));
+                });
+        //For array inside parameters
+        queryParams.entrySet().stream()
+                .filter(param -> param.getValue() != null && param.getValue().startsWith("["))
+                .forEach(param -> {
+                    var value = StringUtils.substringBetween(param.getValue(), "[", "]");
+                    var requests = context.stream()
+                            .filter(request -> request.isResultContainsKey(value))
+                            .collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(requests)) {
+                        paramsWithIds.replace(param.getKey(),
+                                StringUtils.join(requests.stream()
+                                        .map(request -> request.getResultValueByKey(value))
+                                        .collect(Collectors.toList()), ","));
+                    }
                 });
         return paramsWithIds;
     }

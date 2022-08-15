@@ -44,6 +44,7 @@ import platform.qa.entities.context.Request;
 import platform.qa.rest.RestApiClient;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -201,6 +202,13 @@ public class RestApiStepDefinitions {
         context.removeAll(filteredRequests);
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
+
+    @Тоді("користувач очищує контекст від збережених результатів попередніх запитів")
+    public void clearContext() {
+        testContext.getScenarioContext().setContext(API_RESULTS, new ArrayList<Request>());
+    }
+
+
 
     private List<Integer> getSuccessStatuses() {
         return List.of(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED,

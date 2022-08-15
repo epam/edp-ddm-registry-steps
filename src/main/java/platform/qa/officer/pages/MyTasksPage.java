@@ -34,7 +34,7 @@ public class MyTasksPage extends OfficerBasePage {
     private WebElement provisionedTasksTab;
     @FindBy(xpath = "//div[@data-xpath='header']/following-sibling::div//h1")
     private WebElement myTasksHeader;
-    @FindBy(xpath = "//div[@data-testid='timed-notification']")
+    @FindBy(xpath = "//div[@data-testid='timed-notification']//*[@role='img']/following-sibling::div")
     private WebElement timedCreatedNotification;
 
     public MyTasksPage() {
