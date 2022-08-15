@@ -17,13 +17,13 @@
 package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import platform.qa.base.BasePage;
 
-import java.util.Objects;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -33,6 +33,8 @@ public class Select extends BasePage {
 
     private final String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
             + "]]/following-sibling::div//button[@title=\"Open\"]";
+    private final String selectDropdownInputPath = "//label[text()[contains(.,\"%s\")"
+            + "]]/following-sibling::div//input[@type='text']";
 
     private final String selectItems = "//ul[contains(@class,'MuiAutocomplete-listbox')]/li";
 
@@ -42,13 +44,13 @@ public class Select extends BasePage {
     }
 
     public void selectItemFromDropDown(String itemName, String itemValue) {
-        String selectXPath = getSelectXPath(itemName);
-        WebElement select = driver.findElement(xpath(selectXPath));
+        String selectButtonXPath = format(selectDropdownButtonPath, itemName);
+        WebElement select = driver.findElement(xpath(selectButtonXPath));
         wait.until(ExpectedConditions.elementToBeClickable(select))
                 .click();
         wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
         wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
-        wait.until((ExpectedCondition<Boolean>) driver -> Objects.requireNonNull(driver)
+        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
                 .findElements(xpath(selectItems)).stream()
                 .noneMatch(item -> item.getText().isEmpty()));
         WebElement element = driver.findElements(xpath(selectItems)).stream()
@@ -57,10 +59,14 @@ public class Select extends BasePage {
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", element);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
-        wait.until((ExpectedCondition<Boolean>) driver -> !select.getAttribute("value").isEmpty());
+        checkValueSelected(itemName);
     }
 
-    public String getSelectXPath(String itemName) {
-        return format(selectDropdownButtonPath, itemName);
+    private void checkValueSelected(String itemName) {
+        String selectInputXPath = format(selectDropdownInputPath, itemName);
+        wait.until((ExpectedCondition<Boolean>) driver -> !requireNonNull(driver)
+                .findElement(xpath(selectInputXPath))
+                .getAttribute("value")
+                .isEmpty());
     }
 }
