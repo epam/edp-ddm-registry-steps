@@ -55,8 +55,7 @@ public class Select extends BasePage {
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
         wait.until(ExpectedConditions.elementToBeClickable(selectItem))
                 .click();
-        checkValueSelected(itemName);
-        Thread.sleep(2000);
+        checkValueSelected(itemName, itemValue);
     }
 
     private WebElement getElementByStartText(String itemValue) {
@@ -73,12 +72,11 @@ public class Select extends BasePage {
                 .anyMatch(item -> item.getText().startsWith(itemValue)));
     }
 
-    private void checkValueSelected(String itemName) {
+    private void checkValueSelected(String itemName, String itemValue) {
         String selectInputXPath = getSelectInputXPath(itemName);
-        wait.until((ExpectedCondition<Boolean>) driver -> !requireNonNull(driver)
+        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
                 .findElement(xpath(selectInputXPath))
-                .getAttribute("value")
-                .isEmpty());
+                .getText().startsWith(itemValue));
     }
 
     public String getSelectInputXPath(String itemName) {
