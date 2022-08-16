@@ -32,6 +32,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElements
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
+import lombok.extern.log4j.Log4j2;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
 
@@ -42,6 +43,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+@Log4j2
 public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
@@ -99,6 +101,7 @@ public class TaskPage extends CommonTaskPage {
         } else {
             wait.until(not(elementToBeClickable(xpath(submitButtonPath))));
         }
+        log.info("Кнопка далі активна = " + driver.findElement(xpath(submitButtonPath)).isEnabled());
     }
 
     public void selectDataFromDateTime(String fieldName, String fieldData) {

@@ -31,11 +31,11 @@ public class RestApiConvertor {
     /**
      * Method to replace parameters such as ids with data get from context
      *
-     * @param queryParams - parameters for POST or PUT request
+     * @param queryParams - parameters for GET request
      * @return - parameters with values for such parameters as id got from previous requests results from context
      */
-    public static Map<String, Object> getParametersWithIds(Map<String, String> queryParams, List<Request> context) {
-        Map<String, Object> paramsWithIds = new HashMap<>(queryParams);
+    public static Map<String, String> getQueryParamsWithIds(Map<String, String> queryParams, List<Request> context) {
+        Map<String, String> paramsWithIds = new HashMap<>(queryParams);
 
         if (CollectionUtils.isEmpty(context)) return paramsWithIds;
 
@@ -48,6 +48,18 @@ public class RestApiConvertor {
                     lastRequest.ifPresent(request -> paramsWithIds.replace(param.getKey(),
                             String.valueOf(request.getResultValueByKey(param.getKey()))));
                 });
+        return paramsWithIds;
+    }
+
+    /**
+     * Method to replace parameters such as ids with data get from context
+     *
+     * @param queryParams - parameters for POST or PUT request
+     * @return - parameters with values for such parameters as id got from previous requests results from context
+     */
+    public static Map<String, Object> getBodyWithIds(Map<String, String> queryParams, List<Request> context) {
+        Map<String, Object> bodyWithIds = new HashMap<>(getQueryParamsWithIds(queryParams, context));
+
         //For array inside parameters
         queryParams.entrySet().stream()
                 .filter(param -> param.getValue() != null && param.getValue().startsWith("["))
@@ -57,12 +69,12 @@ public class RestApiConvertor {
                             .filter(request -> request.isResultContainsKey(value))
                             .collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(requests)) {
-                        paramsWithIds.replace(param.getKey(),
+                        bodyWithIds.replace(param.getKey(),
                                 requests.stream()
                                         .map(request -> request.getResultValueByKey(value)).collect(Collectors.toList()));
                     }
                 });
-        return paramsWithIds;
+        return bodyWithIds;
     }
 
     /**

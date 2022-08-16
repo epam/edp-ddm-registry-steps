@@ -20,7 +20,8 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.in;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
-import static platform.qa.base.convertors.RestApiConvertor.getParametersWithIds;
+import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
+import static platform.qa.base.convertors.RestApiConvertor.getQueryParamsWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getResultKeyConvertedToCamelCase;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
 import static platform.qa.enums.Context.API_RESULTS;
@@ -76,15 +77,12 @@ public class RestApiStepDefinitions {
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        var parametersWithIds = getParametersWithIds(queryParams, context);
+        var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
         if (parametersWithIds.containsValue(null)) return;
 
-        Map<String, String> paramsWithIds =
-                parametersWithIds.entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
-                .sendGetWithParams(path, paramsWithIds)
+                .sendGetWithParams(path, parametersWithIds)
                 .extract()
                 .response()
                 .jsonPath()
@@ -130,7 +128,7 @@ public class RestApiStepDefinitions {
                                              @NonNull String path,
                                              @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, Object> paramsWithIds = getParametersWithIds(queryParams, context);
+        Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
         if (paramsWithIds.containsValue(null)) return;
 
@@ -163,7 +161,7 @@ public class RestApiStepDefinitions {
                                             @NonNull String id,
                                             @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, Object> paramsWithIds = getParametersWithIds(queryParams, context);
+        Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
         if (paramsWithIds.containsValue(null)) return;
 
