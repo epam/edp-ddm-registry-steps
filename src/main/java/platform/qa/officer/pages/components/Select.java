@@ -22,9 +22,9 @@ import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
+import lombok.SneakyThrows;
 import platform.qa.base.BasePage;
 
-import java.time.Duration;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -44,6 +44,7 @@ public class Select extends BasePage {
         loadingComponents();
     }
 
+    @SneakyThrows
     public void selectItemFromDropDown(String itemName, String itemValue) {
         String selectButtonXPath = format(selectDropdownButtonPath, itemName);
         WebElement select = driver.findElement(xpath(selectButtonXPath));
@@ -53,11 +54,10 @@ public class Select extends BasePage {
         WebElement element = driver.findElements(xpath(selectItems)).stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(12));
         scrollIntoElementView(element);
+        Thread.sleep(800);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
         checkValueSelected(itemName);
     }
 
