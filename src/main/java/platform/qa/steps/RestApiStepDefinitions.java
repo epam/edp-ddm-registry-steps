@@ -76,11 +76,13 @@ public class RestApiStepDefinitions {
                                             @NonNull String path,
                                             @NonNull Map<String, String> queryParams) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, String> paramsWithIds =
-                getParametersWithIds(queryParams, context).entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
-        if (paramsWithIds.containsValue(null)) return;
+        var parametersWithIds = getParametersWithIds(queryParams, context);
 
+        if (parametersWithIds.containsValue(null)) return;
+
+        Map<String, String> paramsWithIds =
+                parametersWithIds.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, paramsWithIds)
                 .extract()
