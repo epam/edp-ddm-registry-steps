@@ -19,67 +19,82 @@ package platform.qa.officer.pages.components;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.openqa.selenium.By.xpath;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
+import java.util.List;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
+@Log4j2
 public class Select extends BasePage {
 
-    private final String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
-            + "]]/following-sibling::div//button[@title=\"Open\"]";
-    private final String selectDropdownInputPath = "//label[text()[contains(.,\"%s\")"
-            + "]]/following-sibling::div//input[@type='text']";
+    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::div//button[@title='Open']";
 
-    private final String selectItems = "//ul[contains(@class,'MuiAutocomplete-listbox')]/li";
+    @FindBy(xpath = "//ul[@role='listbox']")
+    private WebElement selectTable;
+
+    @FindBy(xpath = "//ul[@role='listbox']/li[@role='option']")
+    private List<WebElement> selectItems;
 
     public Select() {
         loadingPage();
         loadingComponents();
     }
 
+    @SneakyThrows
     public void selectItemFromDropDown(String itemName, String itemValue) {
-        String selectButtonXPath = format(selectDropdownButtonPath, itemName);
-        WebElement select = driver.findElement(xpath(selectButtonXPath));
-        wait.until(ExpectedConditions.elementToBeClickable(select))
+        var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
+        wait.until(elementToBeClickable(selectButton))
                 .click();
         waitDropdownLoaded(itemValue);
-        WebElement element = getElementByStartText(itemValue);
-        ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-        element = getElementByStartText(itemValue);
-        wait.until(ExpectedConditions.elementToBeClickable(element))
-                .click();
-        checkValueSelected(itemName);
+        scrollToItem(itemValue);
+        selectItem(itemValue);
+        wait.until(invisibilityOf(selectTable));
     }
 
-    private WebElement getElementByStartText(String itemValue) {
-        return driver.findElements(xpath(selectItems)).stream()
+    private void selectItem(String itemValue) {
+        getDefaultWebDriverWait()
+                .ignoring(StaleElementReferenceException.class)
+                .until((ExpectedCondition<WebElement>) driver -> {
+                    log.info("Start to select item by value = " + itemValue);
+                    WebElement item = getItemByText(itemValue);
+                    item.click();
+                    return item;
+                });
+    }
+
+    private void scrollToItem(String itemValue) {
+        getDefaultWebDriverWait()
+                .ignoring(StaleElementReferenceException.class)
+                .until((ExpectedCondition<WebElement>) driver -> {
+                    log.info("Start to scroll to select item!");
+                    var selectItem = getItemByText(itemValue);
+                    ((ChromeDriver) requireNonNull(driver)).executeScript("arguments[0].scrollIntoView(true);",
+                            selectItem);
+                    return selectItem;
+                });
+    }
+
+    private WebElement getItemByText(String itemValue) {
+        return selectItems.stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
     }
 
     private void waitDropdownLoaded(String itemValue) {
-        wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
-        wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
-        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
-                .findElements(xpath(selectItems)).stream()
+        wait.until(visibilityOf(selectTable));
+        wait.until(visibilityOfAllElements(selectItems));
+        wait.until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
                 .anyMatch(item -> item.getText().startsWith(itemValue)));
-    }
-
-    private void checkValueSelected(String itemName) {
-        String selectInputXPath = getSelectInputXPath(itemName);
-        wait.until((ExpectedCondition<Boolean>) driver -> !requireNonNull(driver)
-                .findElement(xpath(selectInputXPath))
-                .getAttribute("value")
-                .isEmpty());
-    }
-
-    public String getSelectInputXPath(String itemName) {
-        return format(selectDropdownInputPath, itemName);
     }
 }
