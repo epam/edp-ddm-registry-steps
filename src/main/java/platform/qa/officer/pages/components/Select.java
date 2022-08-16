@@ -26,7 +26,7 @@ import lombok.SneakyThrows;
 import platform.qa.base.BasePage;
 
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -51,20 +51,19 @@ public class Select extends BasePage {
         wait.until(ExpectedConditions.elementToBeClickable(select))
                 .click();
         waitDropdownLoaded(itemValue);
-        WebElement element = driver.findElements(xpath(selectItems)).stream()
-                .filter(item -> item.getText().startsWith(itemValue))
-                .findFirst().orElseThrow();
-        scrollIntoElementView(element);
+        WebElement element = getElementByStartText(itemValue);
+        ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", element);
         Thread.sleep(800);
+        element = getElementByStartText(itemValue);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
         checkValueSelected(itemName);
     }
 
-    private void scrollIntoElementView(WebElement element) {
-        Actions actions = new Actions(driver);
-        actions.moveToElement(element);
-        actions.perform();
+    private WebElement getElementByStartText(String itemValue) {
+        return driver.findElements(xpath(selectItems)).stream()
+                .filter(item -> item.getText().startsWith(itemValue))
+                .findFirst().orElseThrow();
     }
 
     private void waitDropdownLoaded(String itemValue) {
