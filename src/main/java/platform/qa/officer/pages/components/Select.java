@@ -76,7 +76,7 @@ public class Select extends BasePage {
         String selectInputXPath = getSelectInputXPath(itemName);
         wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
                 .findElement(xpath(selectInputXPath))
-                .getText().startsWith(itemValue));
+                .getAttribute("value").startsWith(itemValue));
     }
 
     public String getSelectInputXPath(String itemName) {
