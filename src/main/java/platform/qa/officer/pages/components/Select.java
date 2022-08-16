@@ -53,10 +53,10 @@ public class Select extends BasePage {
         waitDropdownLoaded(itemValue);
         WebElement selectItem = getElementByStartText(itemValue);
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
-        Thread.sleep(1000);
         wait.until(ExpectedConditions.elementToBeClickable(selectItem))
                 .click();
         checkValueSelected(itemName, itemValue);
+        Thread.sleep(1000);
     }
 
     private WebElement getElementByStartText(String itemValue) {
