@@ -54,7 +54,7 @@ public class Select extends BasePage {
         WebElement selectItem = getElementByStartText(itemValue);
         if (driver.findElements(xpath(selectItems)).size() > 3)
             ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
-        wait.until(ExpectedConditions.elementToBeClickable(selectItem))
+        wait.until(ExpectedConditions.elementToBeClickable(getElementByStartText(itemValue)))
                 .click();
         checkValueSelected(itemName, itemValue);
     }
