@@ -24,6 +24,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllE
 
 import platform.qa.base.BasePage;
 
+import java.time.Duration;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -52,9 +53,11 @@ public class Select extends BasePage {
         WebElement element = driver.findElements(xpath(selectItems)).stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(12));
         scrollIntoElementView(element);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
         checkValueSelected(itemName);
     }
 
