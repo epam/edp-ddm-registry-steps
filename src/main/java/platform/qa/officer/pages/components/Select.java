@@ -48,11 +48,7 @@ public class Select extends BasePage {
         WebElement select = driver.findElement(xpath(selectButtonXPath));
         wait.until(ExpectedConditions.elementToBeClickable(select))
                 .click();
-        wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
-        wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
-        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
-                .findElements(xpath(selectItems)).stream()
-                .noneMatch(item -> item.getText().isEmpty()));
+        waitDropdownLoaded(itemValue);
         WebElement element = driver.findElements(xpath(selectItems)).stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
@@ -60,6 +56,14 @@ public class Select extends BasePage {
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
         checkValueSelected(itemName);
+    }
+
+    private void waitDropdownLoaded(String itemValue) {
+        wait.until(presenceOfAllElementsLocatedBy(xpath(selectItems)));
+        wait.until(visibilityOfAllElements(driver.findElements(xpath(selectItems))));
+        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver)
+                .findElements(xpath(selectItems)).stream()
+                .anyMatch(item -> item.getText().startsWith(itemValue)));
     }
 
     private void checkValueSelected(String itemName) {
