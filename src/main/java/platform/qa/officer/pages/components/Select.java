@@ -52,11 +52,11 @@ public class Select extends BasePage {
                 .click();
         waitDropdownLoaded(itemValue);
         WebElement selectItem = getElementByStartText(itemValue);
-        ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
+        if (driver.findElements(xpath(selectItems)).size() > 3)
+            ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
         wait.until(ExpectedConditions.elementToBeClickable(selectItem))
                 .click();
         checkValueSelected(itemName, itemValue);
-        Thread.sleep(1000);
     }
 
     private WebElement getElementByStartText(String itemValue) {
