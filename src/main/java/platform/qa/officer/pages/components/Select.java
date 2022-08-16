@@ -25,7 +25,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllE
 import platform.qa.base.BasePage;
 
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -52,10 +52,16 @@ public class Select extends BasePage {
         WebElement element = driver.findElements(xpath(selectItems)).stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
-        ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        scrollIntoElementView(element);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();
         checkValueSelected(itemName);
+    }
+
+    private void scrollIntoElementView(WebElement element) {
+        Actions actions = new Actions(driver);
+        actions.moveToElement(element);
+        actions.perform();
     }
 
     private void waitDropdownLoaded(String itemValue) {
