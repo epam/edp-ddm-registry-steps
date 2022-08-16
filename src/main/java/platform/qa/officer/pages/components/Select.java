@@ -22,7 +22,6 @@ import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
-import lombok.SneakyThrows;
 import platform.qa.base.BasePage;
 
 import org.openqa.selenium.WebElement;
@@ -44,7 +43,6 @@ public class Select extends BasePage {
         loadingComponents();
     }
 
-    @SneakyThrows
     public void selectItemFromDropDown(String itemName, String itemValue) {
         String selectButtonXPath = format(selectDropdownButtonPath, itemName);
         WebElement select = driver.findElement(xpath(selectButtonXPath));
@@ -53,7 +51,6 @@ public class Select extends BasePage {
         waitDropdownLoaded(itemValue);
         WebElement element = getElementByStartText(itemValue);
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-        Thread.sleep(800);
         element = getElementByStartText(itemValue);
         wait.until(ExpectedConditions.elementToBeClickable(element))
                 .click();

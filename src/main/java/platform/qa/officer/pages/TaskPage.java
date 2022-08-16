@@ -32,6 +32,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElements
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
@@ -94,6 +95,7 @@ public class TaskPage extends CommonTaskPage {
         wait.until(attributeContains(xpath(fieldXpath), "value", fieldData));
     }
 
+    @SneakyThrows
     public void checkSubmitButtonState(boolean isEnabled) {
         wait.until(presenceOfElementLocated(xpath(submitButtonPath)));
         if (isEnabled) {
@@ -101,6 +103,7 @@ public class TaskPage extends CommonTaskPage {
         } else {
             wait.until(not(elementToBeClickable(xpath(submitButtonPath))));
         }
+        Thread.sleep(1000);
         log.info("Кнопка далі активна = " + driver.findElement(xpath(submitButtonPath)).isEnabled());
     }
 
