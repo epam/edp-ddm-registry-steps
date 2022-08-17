@@ -38,8 +38,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class Select extends BasePage {
 
-    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
-            + "]]/following-sibling::div//button[@title=\"Open\"]";
+    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::div//button[@title='Open']";
 
     @FindBy(xpath = "//ul[@role='listbox']")
     private WebElement selectTable;
@@ -57,34 +56,33 @@ public class Select extends BasePage {
         var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
         wait.until(elementToBeClickable(selectButton))
                 .click();
-        log.info("Press select button");
         waitDropdownLoaded(itemValue);
-        log.info("Item to select founded");
+        scrollToItem(itemValue);
+        selectItem(itemValue);
+        wait.until(invisibilityOf(selectTable));
+    }
+
+    private void selectItem(String itemValue) {
         getDefaultWebDriverWait()
                 .ignoring(StaleElementReferenceException.class)
                 .until((ExpectedCondition<WebElement>) driver -> {
-                    log.info("wait after select button finished!");
-                    var selectItem = getItemByText(itemValue);
-                    ((ChromeDriver) requireNonNull(driver)).executeScript("arguments[0].scrollIntoView(true);", selectItem);
-                    return selectItem;
-                });
-        getDefaultWebDriverWait()
-                .ignoring(StaleElementReferenceException.class)
-                .until((ExpectedCondition<WebElement>) driver -> {
+                    log.info("Start to select item by value = " + itemValue);
                     WebElement item = getItemByText(itemValue);
                     item.click();
                     return item;
                 });
-       /* log.info("scroll into view");
-        sleep(1000);
-        log.info("Document is ready");
-        waitDropdownLoaded(itemValue);
-        log.info("wait after scroll finished!");
-        wait.until(elementToBeClickable(getItemByText(itemValue)))
-                .click();*/
-        log.info("click select item");
-        wait.until(invisibilityOf(selectTable));
-        log.info("select dropdown is not visible");
+    }
+
+    private void scrollToItem(String itemValue) {
+        getDefaultWebDriverWait()
+                .ignoring(StaleElementReferenceException.class)
+                .until((ExpectedCondition<WebElement>) driver -> {
+                    log.info("Start to scroll to select item!");
+                    var selectItem = getItemByText(itemValue);
+                    ((ChromeDriver) requireNonNull(driver)).executeScript("arguments[0].scrollIntoView(true);",
+                            selectItem);
+                    return selectItem;
+                });
     }
 
     private WebElement getItemByText(String itemValue) {
