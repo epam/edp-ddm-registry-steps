@@ -52,7 +52,7 @@ public class Select extends BasePage {
 
     public void selectItemFromDropDown(String itemName, String itemValue) {
         var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
-        wait.withMessage(this::toString).until(elementToBeClickable(selectButton))
+        wait.until(elementToBeClickable(selectButton))
                 .click();
         waitDropdownLoaded(itemValue);
         var selectItem = getItemByText(itemValue);
