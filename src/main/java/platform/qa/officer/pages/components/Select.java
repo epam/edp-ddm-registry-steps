@@ -23,6 +23,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
+import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
@@ -31,6 +32,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+@Log4j2
 public class Select extends BasePage {
 
     private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
@@ -48,16 +50,23 @@ public class Select extends BasePage {
     }
 
     public void selectItemFromDropDown(String itemName, String itemValue) {
-        wait.until(invisibilityOf(selectTable));
         var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
         wait.until(elementToBeClickable(selectButton))
                 .click();
+        log.info("Press select button");
         waitDropdownLoaded(itemValue);
+        log.info("wait after select button finished!");
         var selectItem = getItemByText(itemValue);
+        log.info("Item to select founded");
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
+        log.info("scroll into view");
         waitDropdownLoaded(itemValue);
+        log.info("wait after scroll finished!");
         wait.until(elementToBeClickable(getItemByText(itemValue)))
                 .click();
+        log.info("click select item");
+        wait.until(invisibilityOf(selectTable));
+        log.info("select dropdown is not visible");
     }
 
     private WebElement getItemByText(String itemValue) {
