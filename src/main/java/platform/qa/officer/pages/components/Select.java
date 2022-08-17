@@ -19,6 +19,7 @@ package platform.qa.officer.pages.components;
 import static java.lang.String.format;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
@@ -41,15 +42,13 @@ public class Select extends BasePage {
     @FindBy(xpath = "//ul[@role='listbox']/li[@role='option']")
     private List<WebElement> selectItems;
 
-    @FindBy(xpath = "//div[contains(text(),'No options')]")
-    private WebElement noItemsIndicator;
-
     public Select() {
         loadingPage();
         loadingComponents();
     }
 
     public void selectItemFromDropDown(String itemName, String itemValue) {
+        wait.until(invisibilityOf(selectTable));
         var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
         wait.until(elementToBeClickable(selectButton))
                 .click();
@@ -68,7 +67,6 @@ public class Select extends BasePage {
     }
 
     private void waitDropdownLoaded(String itemValue) {
-       // wait.until(invisibilityOf(noItemsIndicator));
         wait.until(visibilityOf(selectTable));
         wait.until(visibilityOfAllElements(selectItems));
         wait.until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
