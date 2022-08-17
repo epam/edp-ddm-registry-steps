@@ -202,10 +202,8 @@ public class TaskPage extends CommonTaskPage {
                 checkCheckBoxIsChecked(fieldData.getName(), fieldData.getValue());
                 break;
             case INPUT:
-                checkFieldIsFilledWithData(format(this.inputPath, fieldData.getName()), fieldData.getValue());
-                break;
             case SELECT:
-                checkFieldIsFilledWithData(new Select().getSelectInputXPath(fieldData.getName()), fieldData.getValue());
+                checkFieldIsFilledWithData(format(this.inputPath, fieldData.getName()), fieldData.getValue());
                 break;
             case DATETIME:
                 checkFieldIsFilledWithData(format(dateTimePath, fieldData.getName()), fieldData.getValue());
