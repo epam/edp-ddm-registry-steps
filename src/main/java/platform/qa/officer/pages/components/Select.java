@@ -17,6 +17,7 @@
 package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
@@ -28,7 +29,6 @@ import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -59,18 +59,21 @@ public class Select extends BasePage {
                 .click();
         log.info("Press select button");
         waitDropdownLoaded(itemValue);
-        log.info("wait after select button finished!");
-        var selectItem = getItemByText(itemValue);
         log.info("Item to select founded");
-        ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
-        CompletableFuture<String> cf0 =
-                CompletableFuture.failedFuture(new StaleElementReferenceException("Item not inside dom!"));
-
-        CompletableFuture<String> cf1 =
-                cf0.exceptionally(ex -> {
-                    wait.until(elementToBeClickable(getItemByText(itemValue)))
-                            .click();
-                    return "Recovered from \"" + ex.getMessage() + "\"";
+        getDefaultWebDriverWait()
+                .ignoring(StaleElementReferenceException.class)
+                .until((ExpectedCondition<WebElement>) driver -> {
+                    log.info("wait after select button finished!");
+                    var selectItem = getItemByText(itemValue);
+                    ((ChromeDriver) requireNonNull(driver)).executeScript("arguments[0].scrollIntoView(true);", selectItem);
+                    return selectItem;
+                });
+        getDefaultWebDriverWait()
+                .ignoring(StaleElementReferenceException.class)
+                .until((ExpectedCondition<WebElement>) driver -> {
+                    WebElement item = getItemByText(itemValue);
+                    item.click();
+                    return item;
                 });
        /* log.info("scroll into view");
         sleep(1000);
