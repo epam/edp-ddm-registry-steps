@@ -20,6 +20,8 @@ import static java.lang.String.format;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import platform.qa.base.BasePage;
@@ -69,7 +71,9 @@ public class Select extends BasePage {
 
     private void waitDropdownLoaded(String itemValue) {
         wait.until(invisibilityOf(noItemsIndicator));
+        wait.until(stalenessOf(selectTable));
         wait.until(visibilityOf(selectTable));
+        wait.until(invisibilityOfAllElements(selectItems));
         wait.until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
                 .anyMatch(item -> item.getText().startsWith(itemValue)));
     }
