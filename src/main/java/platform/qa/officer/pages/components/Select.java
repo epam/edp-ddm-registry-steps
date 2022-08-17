@@ -17,18 +17,18 @@
 package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
+import static java.lang.Thread.sleep;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
@@ -51,6 +51,7 @@ public class Select extends BasePage {
         loadingComponents();
     }
 
+    @SneakyThrows
     public void selectItemFromDropDown(String itemName, String itemValue) {
         var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
         wait.until(elementToBeClickable(selectButton))
@@ -62,9 +63,7 @@ public class Select extends BasePage {
         log.info("Item to select founded");
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
         log.info("scroll into view");
-        wait.until((ExpectedCondition<Boolean>) wd ->
-                ((JavascriptExecutor) requireNonNull(wd))
-                        .executeScript("return document.readyState").equals("complete"));
+        sleep(1000);
         log.info("Document is ready");
         waitDropdownLoaded(itemValue);
         log.info("wait after scroll finished!");
@@ -76,11 +75,9 @@ public class Select extends BasePage {
     }
 
     private WebElement getItemByText(String itemValue) {
-        WebElement webElement = selectItems.stream()
+        return selectItems.stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
-        wait.until(visibilityOf(webElement));
-        return webElement;
     }
 
     private void waitDropdownLoaded(String itemValue) {
