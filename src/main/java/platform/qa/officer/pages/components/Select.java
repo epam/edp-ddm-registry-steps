@@ -20,7 +20,6 @@ import static java.lang.String.format;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
@@ -74,7 +73,6 @@ public class Select extends BasePage {
         WebElement webElement = selectItems.stream()
                 .filter(item -> item.getText().startsWith(itemValue))
                 .findFirst().orElseThrow();
-        wait.until(stalenessOf(webElement));
         wait.until(visibilityOf(webElement));
         return webElement;
     }
