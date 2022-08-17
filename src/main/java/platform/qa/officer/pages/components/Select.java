@@ -17,7 +17,6 @@
 package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
-import static java.lang.Thread.sleep;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
@@ -29,6 +28,8 @@ import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
@@ -62,13 +63,22 @@ public class Select extends BasePage {
         var selectItem = getItemByText(itemValue);
         log.info("Item to select founded");
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
-        log.info("scroll into view");
+        CompletableFuture<String> cf0 =
+                CompletableFuture.failedFuture(new StaleElementReferenceException("Item not inside dom!"));
+
+        CompletableFuture<String> cf1 =
+                cf0.exceptionally(ex -> {
+                    wait.until(elementToBeClickable(getItemByText(itemValue)))
+                            .click();
+                    return "Recovered from \"" + ex.getMessage() + "\"";
+                });
+       /* log.info("scroll into view");
         sleep(1000);
         log.info("Document is ready");
         waitDropdownLoaded(itemValue);
         log.info("wait after scroll finished!");
         wait.until(elementToBeClickable(getItemByText(itemValue)))
-                .click();
+                .click();*/
         log.info("click select item");
         wait.until(invisibilityOf(selectTable));
         log.info("select dropdown is not visible");
