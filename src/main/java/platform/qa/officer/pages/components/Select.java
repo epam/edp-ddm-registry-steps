@@ -17,6 +17,7 @@
 package platform.qa.officer.pages.components;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
@@ -27,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
@@ -60,6 +62,10 @@ public class Select extends BasePage {
         log.info("Item to select founded");
         ((ChromeDriver) driver).executeScript("arguments[0].scrollIntoView(true);", selectItem);
         log.info("scroll into view");
+        wait.until((ExpectedCondition<Boolean>) wd ->
+                ((JavascriptExecutor) requireNonNull(wd))
+                        .executeScript("return document.readyState").equals("complete"));
+        log.info("Document is ready");
         waitDropdownLoaded(itemValue);
         log.info("wait after scroll finished!");
         wait.until(elementToBeClickable(getItemByText(itemValue)))
