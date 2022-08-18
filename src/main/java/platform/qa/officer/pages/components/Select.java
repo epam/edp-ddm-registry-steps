@@ -22,13 +22,14 @@ import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -38,7 +39,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class Select extends BasePage {
 
-    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::div//button[@title='Open']";
+    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
+            + "]]/following-sibling::div//button[@title='Open']";
 
     @FindBy(xpath = "//ul[@role='listbox']")
     private WebElement selectTable;
@@ -65,6 +67,7 @@ public class Select extends BasePage {
     private void selectItem(String itemValue) {
         getDefaultWebDriverWait()
                 .ignoring(StaleElementReferenceException.class)
+                .ignoring(NoSuchElementException.class)
                 .until((ExpectedCondition<WebElement>) driver -> {
                     log.info("Start to select item by value = " + itemValue);
                     WebElement item = getItemByText(itemValue);
@@ -76,6 +79,7 @@ public class Select extends BasePage {
     private void scrollToItem(String itemValue) {
         getDefaultWebDriverWait()
                 .ignoring(StaleElementReferenceException.class)
+                .ignoring(NoSuchElementException.class)
                 .until((ExpectedCondition<WebElement>) driver -> {
                     log.info("Start to scroll to select item!");
                     var selectItem = getItemByText(itemValue);
@@ -88,13 +92,15 @@ public class Select extends BasePage {
     private WebElement getItemByText(String itemValue) {
         return selectItems.stream()
                 .filter(item -> item.getText().startsWith(itemValue))
-                .findFirst().orElseThrow();
+                .findFirst().orElseThrow(() -> new NoSuchElementException("No value in list!"));
     }
 
     private void waitDropdownLoaded(String itemValue) {
-        wait.until(visibilityOf(selectTable));
-        wait.until(visibilityOfAllElements(selectItems));
-        wait.until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
-                .anyMatch(item -> item.getText().startsWith(itemValue)));
+        wait.ignoring(StaleElementReferenceException.class).until(visibilityOf(selectTable));
+        wait.ignoring(StaleElementReferenceException.class)
+                .withMessage(String.format("item start from text ('%s') to be present in list [%s]", itemValue,
+                        selectItems.stream().map(WebElement::getText).collect(Collectors.joining(","))))
+                .until((ExpectedCondition<Boolean>) driver -> selectItems.stream().anyMatch(item -> item.getText().startsWith(itemValue)));
+        wait = getDefaultWebDriverWait();
     }
 }

@@ -16,11 +16,15 @@
 
 package platform.qa.base.convertors;
 
+import static platform.qa.files.SearchText.searchTextByRegExp;
+
 import platform.qa.entities.context.Request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,4 +95,19 @@ public class RestApiConvertor {
         }
         return result;
     }
+
+    public static String getRequestPathWithIds(String path, List<Request> context) {
+        if (path.matches(".*\\{\\w+}.*")) {
+            AtomicReference<String> newPath = new AtomicReference<>(path);
+            String key = searchTextByRegExp(path, "(?<=\\{)\\w+?(?=\\})");
+            Optional<Request> lastRequest = context.stream()
+                    .filter(request -> request.isResultContainsKey(key) && request.getResultValueByKey(key) != null)
+                    .max(Request::compareTo);
+            lastRequest.ifPresent(request -> newPath.set(path.replaceAll("\\{\\w+}",
+                    request.getResultValueByKey(key))));
+            return newPath.get();
+        }
+        return path;
+    }
 }
+
