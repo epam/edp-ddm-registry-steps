@@ -100,7 +100,7 @@
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
-                    <artifactId>html-formatter</artifactId>
+                    <artifactId>messages</artifactId>
                     <groupId>io.cucumber</groupId>
                 </exclusion>
             </exclusions>
@@ -108,9 +108,8 @@
 
         <dependency>
             <groupId>io.cucumber</groupId>
-            <artifactId>html-formatter</artifactId>
-            <version>${cucumber-html-formatter.version}</version>
-            <scope>compile</scope>
+            <artifactId>messages</artifactId>
+            <version>17.1.1</version>
         </dependency>
 
         <dependency>
