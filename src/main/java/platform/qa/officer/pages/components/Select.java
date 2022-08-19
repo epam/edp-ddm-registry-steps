@@ -39,7 +39,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class Select extends BasePage {
 
-    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::div//button[@title='Open']";
+    private String selectDropdownButtonPath = "//label[text()[contains(.,\"%s\")"
+            + "]]/following-sibling::div//button[@title='Open']";
 
     @FindBy(xpath = "//ul[@role='listbox']")
     private WebElement selectTable;
@@ -91,7 +92,7 @@ public class Select extends BasePage {
     private WebElement getItemByText(String itemValue) {
         return selectItems.stream()
                 .filter(item -> item.getText().startsWith(itemValue))
-                .findFirst().orElseThrow();
+                .findFirst().orElseThrow(() -> new NoSuchElementException("No value in list!"));
     }
 
     private void waitDropdownLoaded(String itemValue) {
