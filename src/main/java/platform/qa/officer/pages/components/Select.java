@@ -95,9 +95,9 @@ public class Select extends BasePage {
     }
 
     private void waitDropdownLoaded(String itemValue) {
-        wait.until(visibilityOf(selectTable));
-        wait.until(visibilityOfAllElements(selectItems));
-        wait.until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
+        wait.ignoring(StaleElementReferenceException.class).until(visibilityOf(selectTable));
+        wait.ignoring(StaleElementReferenceException.class).until(visibilityOfAllElements(selectItems));
+        wait.ignoring(StaleElementReferenceException.class).until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
                 .anyMatch(item -> item.getText().startsWith(itemValue)));
     }
 }
