@@ -12,7 +12,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.7</aspectj.version>
         <cucumber.version>7.2.3</cucumber.version>
-        <cucumber-html-formatter.version>17.0.0</cucumber-html-formatter.version>
         <junit.version>5.8.2</junit.version>
         <json-unit-assertj.version>2.28.0</json-unit-assertj.version>
         <netty-all.version>4.1.75.Final</netty-all.version>
