@@ -29,6 +29,7 @@ import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -65,6 +66,7 @@ public class Select extends BasePage {
     private void selectItem(String itemValue) {
         getDefaultWebDriverWait()
                 .ignoring(StaleElementReferenceException.class)
+                .ignoring(NoSuchElementException.class)
                 .until((ExpectedCondition<WebElement>) driver -> {
                     log.info("Start to select item by value = " + itemValue);
                     WebElement item = getItemByText(itemValue);
@@ -76,6 +78,7 @@ public class Select extends BasePage {
     private void scrollToItem(String itemValue) {
         getDefaultWebDriverWait()
                 .ignoring(StaleElementReferenceException.class)
+                .ignoring(NoSuchElementException.class)
                 .until((ExpectedCondition<WebElement>) driver -> {
                     log.info("Start to scroll to select item!");
                     var selectItem = getItemByText(itemValue);
