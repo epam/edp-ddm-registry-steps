@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,14 @@ public class Request implements Comparable<Request> {
     public String getResultValueByKey(String keyName) {
         Optional<Map> resultMap = results.stream().filter(map -> map.get(keyName) != null).findFirst();
         return resultMap.map(map -> String.valueOf(map.get(keyName))).orElse(null);
+    }
+
+    public void setResultValueByKey(String key, String value) {
+        var resultList = results.stream()
+                .filter(map -> map.get(key) != null)
+                .map(map -> new HashMap(map))
+                .collect(Collectors.toList());
+        resultList.forEach(result -> result.put(key, value));
     }
 
     public List<Map> getResultsContainsMap(Map mapToCheck) {

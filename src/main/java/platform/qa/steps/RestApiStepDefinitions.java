@@ -201,7 +201,10 @@ public class RestApiStepDefinitions {
                 .map(request -> request.getResultValueByKey(idColumnName))
                 .forEach(id -> executeDeleteApiWithId(userName, path, id));
 
-        context.removeAll(filteredRequests);
+        context.stream()
+                .filter(request -> request.isResultContainsKeyWithNonNullValue(idColumnName))
+                .forEach(request -> request.setResultValueByKey(idColumnName, null));
+
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
 
