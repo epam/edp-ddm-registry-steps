@@ -22,13 +22,13 @@ import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.base.BasePage;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -97,8 +97,11 @@ public class Select extends BasePage {
 
     private void waitDropdownLoaded(String itemValue) {
         wait.ignoring(StaleElementReferenceException.class).until(visibilityOf(selectTable));
-        wait.ignoring(StaleElementReferenceException.class).until(visibilityOfAllElements(selectItems));
-        wait.ignoring(StaleElementReferenceException.class).until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
-                .anyMatch(item -> item.getText().startsWith(itemValue)));
+        wait.ignoring(StaleElementReferenceException.class)
+                .withMessage(String.format("text ('%s') to be present in list %s", itemValue,
+                        StringUtils.join(selectItems.stream().map(WebElement::getText), ",")))
+                .until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
+                        .anyMatch(item -> item.getText().startsWith(itemValue)));
+        wait = getDefaultWebDriverWait();
     }
 }
