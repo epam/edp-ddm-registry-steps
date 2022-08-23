@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.in;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
 import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getQueryParamsWithIds;
+import static platform.qa.base.convertors.RestApiConvertor.getRequestPathWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getResultKeyConvertedToCamelCase;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
 import static platform.qa.enums.Context.API_RESULTS;
@@ -96,8 +97,10 @@ public class RestApiStepDefinitions {
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
     public void executeGetApiWithoutParameters(String userName,
                                                String path) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var pathWithIds = getRequestPathWithIds(path, context);
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
-                .get(path)
+                .get(pathWithIds)
                 .then()
                 .statusCode(in(getSuccessStatuses()))
                 .extract()
@@ -105,8 +108,8 @@ public class RestApiStepDefinitions {
                 .jsonPath()
                 .getList("", Map.class);
 
-        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        var request = new Request(path, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
+        var pathContext = pathWithIds.contains("/") ? pathWithIds.substring(0, path.lastIndexOf("/")) : pathWithIds;
+        var request = new Request(pathContext, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
         context.add(request);
 
         testContext.getScenarioContext().setContext(API_RESULTS, context);

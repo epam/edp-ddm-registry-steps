@@ -100,8 +100,7 @@ public class Select extends BasePage {
         wait.ignoring(StaleElementReferenceException.class)
                 .withMessage(String.format("item start from text ('%s') to be present in list [%s]", itemValue,
                         selectItems.stream().map(WebElement::getText).collect(Collectors.joining(","))))
-                .until((ExpectedCondition<Boolean>) driver -> selectItems.stream()
-                        .anyMatch(item -> item.getText().startsWith(itemValue)));
+                .until((ExpectedCondition<Boolean>) driver -> selectItems.stream().anyMatch(item -> item.getText().startsWith(itemValue)));
         wait = getDefaultWebDriverWait();
     }
 }
