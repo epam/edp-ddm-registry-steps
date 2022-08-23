@@ -18,7 +18,6 @@ package platform.qa.steps;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.in;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
 import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getQueryParamsWithIds;
@@ -29,6 +28,7 @@ import static platform.qa.enums.Context.API_RESULTS;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.config.LogConfig;
 import io.restassured.filter.log.ErrorLoggingFilter;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -99,11 +99,9 @@ public class RestApiStepDefinitions {
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .get(path)
                 .then()
-                .statusCode(in(getSuccessStatuses()))
                 .extract()
                 .response()
-                .jsonPath()
-                .getList("", Map.class);
+                .as(new TypeRef<List<Map>>() {});
 
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var request = new Request(path, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
