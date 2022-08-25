@@ -181,18 +181,6 @@ public class RestApiStepDefinitions {
                 .put(id, payload, path);
     }
 
-    @Коли("користувач {string} виконує запит видалення {string} з ідентифікатором {string}")
-    public void executeDeleteApiWithId(String userName,
-                                       @NonNull String path,
-                                       @NonNull String id) {
-        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signDeleteRequest(id);
-
-        new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .delete(id, path + "/");
-    }
-
     @Тоді("користувач {string} виконує запит {string} видалення даних створених в сценарії з назвою параметру {string}")
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
@@ -205,6 +193,7 @@ public class RestApiStepDefinitions {
 
         filteredRequests.stream()
                 .map(request -> request.getResultValueByKey(idColumnName))
+                .distinct()
                 .forEach(id -> executeDeleteApiWithId(userName, path, id));
 
         context.stream()
@@ -217,6 +206,17 @@ public class RestApiStepDefinitions {
     @Тоді("користувач очищує контекст від збережених результатів попередніх запитів")
     public void clearContext() {
         testContext.getScenarioContext().setContext(API_RESULTS, new ArrayList<Request>());
+    }
+
+    private void executeDeleteApiWithId(String userName,
+                                        @NonNull String path,
+                                        @NonNull String id) {
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signDeleteRequest(id);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .delete(id, path + "/");
     }
 
     private List<Integer> getSuccessStatuses() {
