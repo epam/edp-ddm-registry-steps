@@ -57,7 +57,12 @@ public class Request implements Comparable<Request> {
 
     public List<Map> getResultsContainsMap(Map mapToCheck) {
         return results.stream()
-                .filter(map -> map.entrySet().containsAll(mapToCheck.entrySet()))
+                .filter(map -> ((Map<String, Object>) map).entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> String.valueOf(entry.getValue())))
+                        .entrySet()
+                        .containsAll(mapToCheck.entrySet()))
                 .collect(Collectors.toList());
     }
 
