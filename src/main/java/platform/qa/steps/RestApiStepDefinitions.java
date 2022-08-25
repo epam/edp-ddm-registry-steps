@@ -99,6 +99,9 @@ public class RestApiStepDefinitions {
                                                String path) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var pathWithIds = getRequestPathWithIds(path, context);
+
+        if (pathWithIds.contains("{")) return;
+
         var responseObj = new RestApiClient(registryConfig.getDataFactory(userName))
                 .get(pathWithIds)
                 .then()
