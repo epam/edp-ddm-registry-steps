@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import lombok.SneakyThrows;
@@ -55,8 +56,9 @@ public class Select extends BasePage {
 
     @SneakyThrows
     public void selectItemFromDropDown(String itemName, String itemValue) {
-        var selectButton = driver.findElement(xpath(format(selectDropdownButtonPath, itemName)));
-        wait.until(elementToBeClickable(selectButton))
+        var selectButtonPath = xpath(format(selectDropdownButtonPath, itemName));
+        wait.until(presenceOfElementLocated(selectButtonPath));
+        wait.until(elementToBeClickable(selectButtonPath))
                 .click();
         waitDropdownLoaded(itemValue);
         scrollToItem(itemValue);
