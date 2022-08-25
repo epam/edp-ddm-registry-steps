@@ -32,9 +32,7 @@ public class ContextConvertor {
     public static List<Request> convertToRequestsContext(Object context) {
         List<Request> convertedContext = new ArrayList<>();
         if (context instanceof Request) {
-            convertedContext = new ArrayList<>() {{
-                add((Request) context);
-            }};
+            convertedContext.add((Request) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
@@ -51,9 +49,7 @@ public class ContextConvertor {
     public static List<File> convertToFileList(Object context) {
         List<File> convertedContext = new ArrayList<>();
         if (context instanceof File) {
-            convertedContext = new ArrayList<>() {{
-                add((File) context);
-            }};
+            convertedContext.add((File) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
@@ -70,9 +66,7 @@ public class ContextConvertor {
     public static List<String> convertToStringList(Object context) {
         List<String> convertedContext = new ArrayList<>();
         if (context instanceof String) {
-            convertedContext = new ArrayList<>() {{
-                add((String) context);
-            }};
+            convertedContext.add((String) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()

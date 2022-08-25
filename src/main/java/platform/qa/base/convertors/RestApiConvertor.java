@@ -20,6 +20,7 @@ import static platform.qa.files.SearchText.searchTextByRegExp;
 
 import platform.qa.entities.context.Request;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,11 @@ public class RestApiConvertor {
         return result;
     }
 
+    /**
+     * @param path    input request path which can contain id keys without value
+     * @param context scenario context where id values stored from previous requests execution
+     * @return converted request path where id keys filled with values from context
+     */
     public static String getRequestPathWithIds(String path, List<Request> context) {
         if (path.matches(".*\\{\\w+}.*")) {
             AtomicReference<String> newPath = new AtomicReference<>(path);
@@ -108,6 +114,23 @@ public class RestApiConvertor {
             return newPath.get();
         }
         return path;
+    }
+
+    /**
+     * @param responseObject request response object
+     * @return converted response object to List<Map>
+     */
+    public static List<Map> convertToListMap(Object responseObject) {
+        List<Map> convertedResponse = new ArrayList<>();
+        if (responseObject instanceof Map) {
+            convertedResponse.add((Map) responseObject);
+        }
+        if (responseObject instanceof List<?>) {
+            convertedResponse = ((List<?>) responseObject).stream()
+                    .map(item -> (Map) item)
+                    .collect(Collectors.toList());
+        }
+        return convertedResponse;
     }
 }
 
