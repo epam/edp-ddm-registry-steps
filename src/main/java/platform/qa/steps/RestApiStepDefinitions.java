@@ -18,6 +18,7 @@ package platform.qa.steps;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.in;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
 import static platform.qa.base.convertors.RestApiConvertor.convertToListMap;
 import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
@@ -198,12 +199,15 @@ public class RestApiStepDefinitions {
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
-        var result = new RestApiClient(registryConfig.getDataFactory(userName), signature)
+        var response = new RestApiClient(registryConfig.getDataFactory(userName), signature)
                 .post(payload, path)
                 .then()
-                .statusCode(201)
+                .statusCode(in(List.of(201, 409)))
                 .extract()
-                .response()
+                .response();
+        if (response.statusCode() == 409) return;
+
+        var result = response
                 .jsonPath()
                 .getMap("");
 
