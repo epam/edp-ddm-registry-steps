@@ -61,7 +61,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Log4j2
 public class RestApiStepDefinitions {
-    private RegistryConfig registryConfig = MasterConfig.getInstance().getRegistryConfig();
+    private MasterConfig masterConfig = MasterConfig.getInstance();
+    private RegistryConfig registryConfig = masterConfig.getRegistryConfig();
     private TestContext testContext;
 
     public RestApiStepDefinitions(TestContext testContext) {
@@ -94,15 +95,68 @@ public class RestApiStepDefinitions {
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
 
+    @Коли("користувач {string} виконує запит пошуку {string} в реєстрі {string} з параметрами")
+    public void executeGetExternalRegistryApiWithParameters(@NonNull String userName,
+                                                            @NonNull String path,
+                                                            @NonNull String registryName,
+                                                            @NonNull Map<String, String> queryParams) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var parametersWithIds = getQueryParamsWithIds(queryParams, context);
+
+        if (parametersWithIds.containsValue(null)) return;
+
+        masterConfig.setNamespaces(singletonList(registryName));
+        var externalRegConfig = masterConfig.getRegistryConfig(registryName);
+
+        var result = new RestApiClient(externalRegConfig.getDataFactory(userName))
+                .sendGetWithParams(path, parametersWithIds)
+                .extract()
+                .response()
+                .jsonPath()
+                .getList("", Map.class);
+        var request = new Request(path, queryParams, result, new Timestamp(currentTimeMillis()));
+        context.add(request);
+
+        testContext.getScenarioContext().setContext(API_RESULTS, context);
+    }
+
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
-    public void executeGetApiWithoutParameters(String userName,
-                                               String path) {
+    public void executeGetApiWithoutParameters(@NonNull String userName,
+                                               @NonNull String path) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var pathWithIds = getRequestPathWithIds(path, context);
 
         if (pathWithIds.contains("{")) return;
 
         var responseObj = new RestApiClient(registryConfig.getDataFactory(userName))
+                .get(pathWithIds)
+                .then()
+                .extract()
+                .response()
+                .jsonPath()
+                .get("");
+        var result = convertToListMap(responseObj);
+
+        var pathContext = pathWithIds.contains("/") ? pathWithIds.substring(0, path.lastIndexOf("/")) : pathWithIds;
+        var request = new Request(pathContext, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
+        context.add(request);
+
+        testContext.getScenarioContext().setContext(API_RESULTS, context);
+    }
+
+    @Коли("користувач {string} виконує запит пошуку {string} в реєстрі {string} без параметрів")
+    public void executeGetExternalRegistryApiWithoutParameters(@NonNull String userName,
+                                                               @NonNull String path,
+                                                               @NonNull String registryName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var pathWithIds = getRequestPathWithIds(path, context);
+
+        if (pathWithIds.contains("{")) return;
+
+        masterConfig.setNamespaces(singletonList(registryName));
+        var externalRegConfig = masterConfig.getRegistryConfig(registryName);
+
+        var responseObj = new RestApiClient(externalRegConfig.getDataFactory(userName))
                 .get(pathWithIds)
                 .then()
                 .extract()
