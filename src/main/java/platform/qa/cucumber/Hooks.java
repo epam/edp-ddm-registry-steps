@@ -40,5 +40,6 @@ public class Hooks {
             Screenshot.takeScreenshot();
             closeWebDriver();
         }
+        if (isWebDriverOpened()) closeWebDriver();
     }
 }
