@@ -17,7 +17,7 @@
         <netty-all.version>4.1.75.Final</netty-all.version>
         <log4j-core.version>2.17.2</log4j-core.version>
 
-        <platform-qa-config.version>1.6.0-REG-STEPS-SNAPSHOT</platform-qa-config.version>
+        <platform-qa-config.version>1.6.0.38</platform-qa-config.version>
         <platform-qa-utils.version>1.6.0.13</platform-qa-utils.version>
         <global-qa-entities.version>1.6.0.8</global-qa-entities.version>
 
