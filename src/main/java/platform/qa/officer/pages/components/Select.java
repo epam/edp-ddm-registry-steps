@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
@@ -100,9 +101,21 @@ public class Select extends BasePage {
     private void waitDropdownLoaded(String itemValue) {
         wait.ignoring(StaleElementReferenceException.class).until(visibilityOf(selectTable));
         wait.ignoring(StaleElementReferenceException.class)
-                .withMessage(String.format("item start from text ('%s') to be present in list [%s]", itemValue,
-                        selectItems.stream().map(WebElement::getText).collect(Collectors.joining(","))))
-                .until((ExpectedCondition<Boolean>) driver -> selectItems.stream().anyMatch(item -> item.getText().startsWith(itemValue)));
-        wait = getDefaultWebDriverWait();
+                .until(new ExpectedCondition<Boolean>() {
+                    String list = "";
+                    public Boolean apply(WebDriver driver) {
+                        try {
+                            list = selectItems.stream().map(WebElement::getText).collect(Collectors.joining(","));
+                            return selectItems.stream().anyMatch(item -> item.getText().startsWith(itemValue));
+                        } catch (StaleElementReferenceException var3) {
+                            return false;
+                        }
+                    }
+
+                    public String toString() {
+                        return String.format("item start from text ('%s') to be present in list [%s]", itemValue, list);
+                    }
+                });
     }
+
 }
