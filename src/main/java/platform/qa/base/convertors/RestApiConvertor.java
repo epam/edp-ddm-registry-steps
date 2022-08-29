@@ -16,6 +16,7 @@
 
 package platform.qa.base.convertors;
 
+import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static platform.qa.files.SearchText.searchTextByRegExp;
 
 import platform.qa.entities.context.Request;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 
 public class RestApiConvertor {
@@ -45,13 +45,14 @@ public class RestApiConvertor {
         if (CollectionUtils.isEmpty(context)) return paramsWithIds;
 
         queryParams.entrySet().stream()
-                .filter(param -> param.getValue() == null)
+                .filter(param -> substringBetween(param.getValue(), "{", "}") != null)
                 .forEach(param -> {
+                    var key = substringBetween(param.getValue(), "{", "}");
                     var lastRequest = context.stream()
-                            .filter(request -> request.isResultContainsKey(param.getKey()))
+                            .filter(request -> request.isResultContainsKey(key))
                             .max(Request::compareTo);
                     lastRequest.ifPresent(request -> paramsWithIds.replace(param.getKey(),
-                            String.valueOf(request.getResultValueByKey(param.getKey()))));
+                            String.valueOf(request.getResultValueByKey(key))));
                 });
         return paramsWithIds;
     }
@@ -67,9 +68,9 @@ public class RestApiConvertor {
 
         //For array inside parameters
         queryParams.entrySet().stream()
-                .filter(param -> param.getValue() != null && param.getValue().startsWith("["))
+                .filter(param -> substringBetween(param.getValue(), "[", "]") != null)
                 .forEach(param -> {
-                    var value = StringUtils.substringBetween(param.getValue(), "[", "]");
+                    var value = substringBetween(param.getValue(), "[", "]");
                     var requests = context.stream()
                             .filter(request -> request.isResultContainsKey(value))
                             .collect(Collectors.toList());
