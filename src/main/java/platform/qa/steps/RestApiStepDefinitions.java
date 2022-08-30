@@ -26,6 +26,7 @@ import static platform.qa.base.convertors.RestApiConvertor.getQueryParamsWithIds
 import static platform.qa.base.convertors.RestApiConvertor.getRequestPathWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getResultKeyConvertedToCamelCase;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
+import static platform.qa.base.utils.RequestUtils.hasCurlyBracketsInQueryParameters;
 import static platform.qa.enums.Context.API_RESULTS;
 
 import io.cucumber.java.uk.Коли;
@@ -82,7 +83,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
-        if (parametersWithIds.containsValue(null)) return;
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
 
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, parametersWithIds)
@@ -104,7 +105,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
-        if (parametersWithIds.containsValue(null)) return;
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
 
         masterConfig.setNamespaces(singletonList(registryName));
         var externalRegConfig = masterConfig.getRegistryConfig(registryName);
@@ -191,7 +192,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
-        if (paramsWithIds.containsValue(null)) return;
+        if (hasCurlyBracketsInQueryParameters(paramsWithIds)) return;
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),

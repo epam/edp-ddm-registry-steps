@@ -16,6 +16,7 @@
 
 package platform.qa.base.convertors;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static platform.qa.files.SearchText.searchTextByRegExp;
 
@@ -45,7 +46,7 @@ public class RestApiConvertor {
         if (CollectionUtils.isEmpty(context)) return paramsWithIds;
 
         queryParams.entrySet().stream()
-                .filter(param -> substringBetween(param.getValue(), "{", "}") != null)
+                .filter(param -> isNotEmpty(substringBetween(param.getValue(), "{", "}")))
                 .forEach(param -> {
                     var key = substringBetween(param.getValue(), "{", "}");
                     var lastRequest = context.stream()
@@ -68,7 +69,7 @@ public class RestApiConvertor {
 
         //For array inside parameters
         queryParams.entrySet().stream()
-                .filter(param -> substringBetween(param.getValue(), "[", "]") != null)
+                .filter(param -> isNotEmpty(substringBetween(param.getValue(), "[", "]")))
                 .forEach(param -> {
                     var value = substringBetween(param.getValue(), "[", "]");
                     var requests = context.stream()
