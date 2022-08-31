@@ -19,10 +19,13 @@ package platform.qa.officer.pages;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
+import lombok.extern.log4j.Log4j2;
+
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
+@Log4j2
 public class LoginPage extends OfficerBasePage {
 
     @FindBy(xpath = "//button[@data-xpath='loginButton']")
@@ -56,10 +59,13 @@ public class LoginPage extends OfficerBasePage {
     }
 
     private String getExpectedLoginUrl() {
-        if (baseUrl.lastIndexOf("/") < 0) return baseUrl + "/officer/login";
-        if (baseUrl.endsWith("/") && !baseUrl.endsWith("officer/")) return baseUrl + "officer/login";
-        if (baseUrl.endsWith("officer")) return baseUrl + "/login";
-        if (baseUrl.endsWith("officer/")) return baseUrl + "login";
-        return baseUrl;
+        String loginUrl = baseUrl;
+        if (baseUrl.lastIndexOf("/") < 0) loginUrl = baseUrl + "/officer/login";
+        if (baseUrl.endsWith("/") && !baseUrl.endsWith("officer/")) loginUrl = baseUrl + "officer/login";
+        if (baseUrl.endsWith("officer")) loginUrl = baseUrl + "/login";
+        if (baseUrl.endsWith("officer/")) loginUrl = baseUrl + "login";
+        log.info("Base url = " + baseUrl);
+        log.info("Expected login url = " + loginUrl);
+        return loginUrl;
     }
 }

@@ -177,7 +177,8 @@ public class RestApiStepDefinitions {
     @Коли("виконується фільтрація результатів запиту {string} за параметрами")
     public void filterApiResultsByParams(@NonNull String path, @NonNull Map<String, String> params) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        var filteredContext = getLastRequest(context, path).getResultsContainsMap(params);
+        var parametersWithIds = getQueryParamsWithIds(params, context);
+        var filteredContext = getLastRequest(context, path).getResultsContainsMap(parametersWithIds);
         getLastRequest(context, path).setResults(filteredContext);
 
         log.info("Відфільтровані результати наступні: \n" + StringUtils.join(filteredContext, "\n"));
