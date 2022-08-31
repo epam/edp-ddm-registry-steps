@@ -27,7 +27,6 @@ public class LoginPage extends OfficerBasePage {
 
     @FindBy(xpath = "//button[@data-xpath='loginButton']")
     WebElement authButton;
-    String loginUrl = baseUrl + "login";
 
     public AuthWithCesPage openAuthWithCesPage() {
         return openPage()
@@ -36,10 +35,10 @@ public class LoginPage extends OfficerBasePage {
     }
 
     public LoginPage openPage() {
-        openPage(loginUrl);
+        openPage(baseUrl);
         wait
                 .withMessage("Поточний URL не збігається з очікуваним")
-                .until(ExpectedConditions.urlToBe(loginUrl));
+                .until(ExpectedConditions.urlToBe(getExpectedLoginUrl()));
         wait = getDefaultWebDriverWait();
         return this;
     }
@@ -54,5 +53,13 @@ public class LoginPage extends OfficerBasePage {
     public LoginPage checkThatAuthorizationButtonIsActive() {
         wait.until(elementToBeClickable(authButton));
         return this;
+    }
+
+    private String getExpectedLoginUrl() {
+        if (baseUrl.lastIndexOf("/") < 0) return baseUrl + "/officer/login";
+        if (baseUrl.endsWith("/") && !baseUrl.endsWith("officer/")) return baseUrl + "officer/login";
+        if (baseUrl.endsWith("officer")) return baseUrl + "/login";
+        if (baseUrl.endsWith("officer/")) return baseUrl + "login";
+        return baseUrl;
     }
 }
