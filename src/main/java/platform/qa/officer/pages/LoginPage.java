@@ -57,10 +57,10 @@ public class LoginPage extends OfficerBasePage {
     }
 
     private String getExpectedLoginUrl() {
-        if (baseUrl.lastIndexOf("/") < 0) return baseUrl + "/officer/login";
-        if (baseUrl.endsWith("/") && !baseUrl.endsWith("officer/")) return baseUrl + "officer/login";
         if (baseUrl.endsWith("officer")) return baseUrl + "/login";
         if (baseUrl.endsWith("officer/")) return baseUrl + "login";
+        if (baseUrl.endsWith("/")) return baseUrl + "officer/login";
+        if (!baseUrl.endsWith("/")) return baseUrl + "/officer/login";
         return baseUrl;
     }
 }
