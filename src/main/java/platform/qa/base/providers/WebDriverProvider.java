@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.configuration.RunUITestConfiguration;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -46,7 +47,7 @@ public class WebDriverProvider {
         WebDriverManager.chromedriver().setup();
         WebDriver driver;
         driver = getDriver();
-        driver.manage().window().maximize();
+        driver.manage().window().setSize(new Dimension(1920, 1080));
         return driver;
     }
 
