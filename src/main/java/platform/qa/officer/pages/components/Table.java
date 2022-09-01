@@ -23,13 +23,11 @@ import platform.qa.base.BasePage;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class Table extends BasePage {
-    @CacheLookup
-    @FindBy(xpath = "//table[@aria-label='table']/tbody//tr")
+    @FindBy(xpath = ".//table[@aria-label='table']/tbody//tr")
     List<Row> tableRows;
 
     private final String tableXpath = "//table[@aria-label='table']";
