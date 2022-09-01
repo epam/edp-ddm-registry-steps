@@ -50,8 +50,8 @@ public class Table extends BasePage {
                     .businessKey(row.findElement(xpath("td[@id='businessKey']")))
                     .taskDefinitionName(row.findElement(xpath("td[@id='taskDefinitionName']")))
                     .startTime(row.findElement(xpath("td[@id='startTime']")))
-                    .endTime(row.findElement(xpath("td[@id='endTime']")))
-                    .actionButton(row.findElement(xpath("td//button")))
+                    .endTime(getOptionalElement(row, "td[@id='endTime']"))
+                    .actionButton(getOptionalElement(row, "td//button"))
                     .build();
             tableRows.add(taskRow);
         });
@@ -76,7 +76,15 @@ public class Table extends BasePage {
         return tableRows.stream().filter(row -> row.getProcessDefinitionName().getText().equals(definitionName) &&
                         row.getBusinessKey().getText().equals(businessKey) && row.getTaskDefinitionName().getText().equals(taskName))
                 .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з "
-                        + "Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)", definitionName, businessKey,
-                        taskName)));
+                                + "Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)", definitionName,
+                        businessKey, taskName)));
+    }
+
+    private WebElement getOptionalElement(WebElement row, String xpathExpression) {
+        try {
+            return row.findElement(xpath(xpathExpression));
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
     }
 }
