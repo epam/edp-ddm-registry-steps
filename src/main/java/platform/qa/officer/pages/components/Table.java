@@ -20,23 +20,41 @@ import static org.openqa.selenium.By.xpath;
 
 import platform.qa.base.BasePage;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class Table extends BasePage {
+    @CacheLookup
     @FindBy(xpath = ".//table[@aria-label='table']/tbody//tr")
-    List<Row> tableRows;
-
-    private final String tableXpath = "//table[@aria-label='table']";
+    List<WebElement> webTableRows;
+    List<Row> tableRows = new LinkedList<>();
 
     public Table() {
         loadingPage();
         loadingComponents();
-        wait.until(ExpectedConditions.presenceOfElementLocated(xpath(tableXpath)));
-        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(xpath(tableXpath)));
+        wait.until(ExpectedConditions.presenceOfElementLocated(xpath("//table[@aria-label='table']")));
+        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(xpath("//table[@aria-label='table']/tbody//tr")));
+        setTableRows();
+    }
+
+    public void setTableRows() {
+        webTableRows.forEach(row -> {
+            Row taskRow = Row.builder()
+                    .processDefinitionName(row.findElement(xpath("td[@id='processDefinitionName']")))
+                    .businessKey(row.findElement(xpath("td[@id='businessKey']")))
+                    .taskDefinitionName(row.findElement(xpath("td[@id='taskDefinitionName']")))
+                    .startTime(row.findElement(xpath("td[@id='startTime']")))
+                    .endTime(row.findElement(xpath("td[@id='endTime']")))
+                    .actionButton(row.findElement(xpath("td//button")))
+                    .build();
+            tableRows.add(taskRow);
+        });
     }
 
     public List<Row> getRowsFromTableByTaskName(String taskName) {
@@ -57,7 +75,8 @@ public class Table extends BasePage {
     public Row getRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName) {
         return tableRows.stream().filter(row -> row.getProcessDefinitionName().getText().equals(definitionName) &&
                         row.getBusinessKey().getText().equals(businessKey) && row.getTaskDefinitionName().getText().equals(taskName))
-                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з Послугою (%s)"
-                        + ", ідентифікатором послуги (%s) і задачею (%s)", definitionName, businessKey, taskName)));
+                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з "
+                        + "Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)", definitionName, businessKey,
+                        taskName)));
     }
 }
