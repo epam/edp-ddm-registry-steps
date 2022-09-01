@@ -16,83 +16,50 @@
 
 package platform.qa.officer.pages.components;
 
-import platform.qa.base.BasePage;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import static java.lang.String.format;
 import static org.openqa.selenium.By.xpath;
 
-public class Table extends BasePage {
+import platform.qa.base.BasePage;
 
-    private final String tableRowsPath = "//tbody//tr[contains(@class, 'MuiTableRow-root')]";
-    private final String processDefinitionNamePath = tableRowsPath + "[%d]/td[@id='processDefinitionName']";
-    private final String businessKeyPath = tableRowsPath + "[%d]/td[@id='businessKey']";
-    private final String taskDefinitionNamePath = tableRowsPath + "[%d]/td[@id='taskDefinitionName']";
-    private final String startTimePath = tableRowsPath + "[%d]/td[@id='startTime']";
-    private final String endTimePath = tableRowsPath + "[%d]/td[@id='endTime']";
+import java.util.List;
+import java.util.stream.Collectors;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.CacheLookup;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+public class Table extends BasePage {
+    @CacheLookup
+    @FindBy(xpath = "//table[@aria-label='table']/tbody//tr")
+    List<Row> tableRows;
+
+    private final String tableXpath = "//table[@aria-label='table']";
 
     public Table() {
         loadingPage();
         loadingComponents();
+        wait.until(ExpectedConditions.presenceOfElementLocated(xpath(tableXpath)));
+        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(xpath(tableXpath)));
     }
 
     public List<Row> getRowsFromTableByTaskName(String taskName) {
-        return getTableRows().stream()
-                .filter(row -> row.getTaskDefinitionName().contains(taskName))
+        return tableRows.stream()
+                .filter(row -> row.getTaskDefinitionName().getText().contains(taskName))
                 .collect(Collectors.toList());
     }
 
-    public List<Row> getRowsFromTableByProcessDefinitionNameAndBusinessKey(String processDefinitionName, String businessKey) {
-        return getTableRows().stream()
+    public List<Row> getRowsFromTableByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
+                                                                           String businessKey) {
+        return tableRows.stream()
                 .filter(row ->
-                        row.getProcessDefinitionName().contains(processDefinitionName) &&
-                        row.getBusinessKey().contains(businessKey))
+                        row.getProcessDefinitionName().getText().contains(processDefinitionName) &&
+                                row.getBusinessKey().getText().contains(businessKey))
                 .collect(Collectors.toList());
     }
 
-    private List<Row> getTableRows() {
-        List<Row> rowsList = new ArrayList<>();
-        List<WebElement> tableRows = driver.findElements(xpath(tableRowsPath));
-        if (!tableRows.isEmpty()) {
-            wait.withMessage("Елементи в таблиці недоступні").until(ExpectedConditions.visibilityOfAllElements(tableRows));
-            wait = getDefaultWebDriverWait();
-        }
-        for (int i = 0; i < tableRows.size(); i++) {
-            rowsList.add(
-                    new Row(
-                            getProcessDefinitionNameForTheRow(i + 1).getText(),
-                            getBusinessKeyForTheRow(i + 1).getText(),
-                            getTaskDefinitionNameForTheRow(i + 1).getText(),
-                            getStartTimeForTheRow(i + 1).getText(),
-                            getEndTimeForTheRow(i + 1).getText()
-                    ));
-        }
-        return rowsList;
-    }
-
-    private WebElement getProcessDefinitionNameForTheRow(int rowNumber) {
-        return driver.findElement(xpath(format(processDefinitionNamePath, rowNumber)));
-    }
-
-    private WebElement getBusinessKeyForTheRow(int rowNumber) {
-        return driver.findElement(xpath(format(businessKeyPath, rowNumber)));
-    }
-
-    private WebElement getTaskDefinitionNameForTheRow(int rowNumber) {
-        return driver.findElement(xpath(format(taskDefinitionNamePath, rowNumber)));
-    }
-
-    private WebElement getStartTimeForTheRow(int rowNumber) {
-        return driver.findElement(xpath(format(startTimePath, rowNumber)));
-    }
-
-    private WebElement getEndTimeForTheRow(int rowNumber) {
-        return driver.findElement(xpath(format(endTimePath, rowNumber)));
+    public Row getRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName) {
+        return tableRows.stream().filter(row -> row.getProcessDefinitionName().getText().equals(definitionName) &&
+                        row.getBusinessKey().getText().equals(businessKey) && row.getTaskDefinitionName().getText().equals(taskName))
+                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з Послугою (%s)"
+                        + ", ідентифікатором послуги (%s) і задачею (%s)", definitionName, businessKey, taskName)));
     }
 }

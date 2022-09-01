@@ -125,7 +125,7 @@ public class OfficerCabinetStepDefinitions {
     }
 
     @Коли("бачить форму {string}")
-    public void verifyDisplayFormNameWithoutSubmitButton (String formName) {
+    public void verifyDisplayFormNameWithoutSubmitButton(String formName) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName);
     }
@@ -137,7 +137,7 @@ public class OfficerCabinetStepDefinitions {
     }
 
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
-    public void checkMessage(String formName, String messageLabel, String messageText){
+    public void checkMessage(String formName, String messageLabel, String messageText) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
                 .checkTextareaText(messageLabel, messageText);
@@ -159,15 +159,50 @@ public class OfficerCabinetStepDefinitions {
     @Тоді("процес закінчено успішно й задача {string} відображається як виконана у переліку задач")
     public void verifyTaskCompleted(String taskName) {
         new MyTasksPage().checkNotificationMessage(taskName)
+                .getHeaderPanel().clickOnMyTasksLink()
                 .clickOnProvisionedTasksTab()
                 .checkTaskExistsByTaskName(taskName);
     }
 
-    @Тоді("послуга {string} має ідентифікатор {string}")
-    public void verifyServiceIdentifier(String processDefinitionName, String businessKey) {
-        new MyTasksPage()
+    @Тоді("послуга {string} з ідентифікатором {string} відображена в наданих послугах")
+    public void verifyServiceIdentifierDone(String processDefinitionName, String businessKey) {
+        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
                 .clickOnProvisionedTasksTab()
                 .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
+    }
+
+    @Тоді("послуга {string} з ідентифікатором {string} знаходиться у статусі: Послуги у виконанні")
+    public void verifyServiceIdentifierInProgress(String processDefinitionName, String businessKey) {
+        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+                .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
+    }
+
+    @Тоді("задача {string} за послугою {string} з ідентифікатором {string} знаходиться у статусі: Задачі для виконання")
+    public void verifyTaskServiceIdentifierInProgress(String taskName, String processDefinitionName,
+                                                     String businessKey) {
+        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
+    }
+
+    @Тоді("задача {string} за послугою {string} з ідентифікатором {string} виконана")
+    public void verifyTaskServiceIdentifierDone(String taskName, String processDefinitionName, String businessKey) {
+        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+                .clickOnProvisionedTasksTab()
+                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
+    }
+
+    @Тоді("приймає задачу {string} за послугою {string} з ідентифікатором {string}")
+    public void acceptTask(String taskName, String processDefinitionName, String businessKey) {
+        new MyTasksPage()
+                .getHeaderPanel().clickOnMyTasksLink()
+                .acceptTask(processDefinitionName, businessKey, taskName);
+    }
+
+    @Тоді("виконує задачу {string} за послугою {string} з ідентифікатором {string}")
+    public void submitTask(String taskName, String processDefinitionName, String businessKey) {
+        new MyTasksPage()
+                .getHeaderPanel().clickOnMyTasksLink()
+                .submitTask(processDefinitionName, businessKey, taskName);
     }
 
     @І("додає запис до {string} таблиці із даними")
