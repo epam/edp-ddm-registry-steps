@@ -29,7 +29,7 @@ public class UserInfoPopUp extends BasePage {
     private WebElement logOutButton;
 
     public LoginPage clickLogOutButton() {
-        wait.until(ExpectedConditions.visibilityOf(logOutButton));
+        wait.until(ExpectedConditions.elementToBeClickable(logOutButton)).click();
         return new LoginPage();
     }
 }
