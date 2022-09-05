@@ -30,7 +30,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 public abstract class CommonTaskPage extends BasePage {
-    protected By taskNameBy = xpath("//div[contains(@class, 'root')]/*[self::h1 or self::h2 or self::h3]");
+    protected By taskNameBy = xpath("//div[contains(@class, 'root')]//*[self::h1 or self::h2 or self::h3]");
     @FindBy(xpath = "//button[contains(@name, 'data[submit]')]")
     protected WebElement submitButton;
 
