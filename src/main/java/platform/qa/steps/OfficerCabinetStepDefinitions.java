@@ -88,6 +88,12 @@ public class OfficerCabinetStepDefinitions {
         testContext.getScenarioContext().setContext(OFFICER_USER_LOGIN, users.get(userName).getLogin());
     }
 
+    @Тоді("користувач {string} вийшов з кабінету посадової особи")
+    public void verifyOfficerLogOut(String userName) {
+        new LoginSteps()
+                .logoutOfficerPortal();
+    }
+
     @Дано("бачить доступний процес {string}")
     public void verifyProcessAvailable(String processName) {
         new DashboardPage()
@@ -124,7 +130,7 @@ public class OfficerCabinetStepDefinitions {
         }
     }
 
-    @Коли("бачить форму {string}")
+    @Коли("бачить форму/сторінку {string}")
     public void verifyDisplayFormNameWithoutSubmitButton(String formName) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName);

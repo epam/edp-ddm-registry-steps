@@ -35,6 +35,7 @@ public class Row implements Comparable<Row> {
     private WebElement taskDefinitionName;
     private WebElement startTime;
     private WebElement endTime;
+    private WebElement result;
     private WebElement actionButton;
 
     @Override

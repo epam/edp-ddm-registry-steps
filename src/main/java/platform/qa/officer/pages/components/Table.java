@@ -51,6 +51,7 @@ public class Table extends BasePage {
                     .taskDefinitionName(row.findElement(xpath("td[@id='taskDefinitionName']")))
                     .startTime(row.findElement(xpath("td[@id='startTime']")))
                     .endTime(getOptionalElement(row, "td[@id='endTime']"))
+                    .result(getOptionalElement(row, "td[@id='excerptResult']"))
                     .actionButton(getOptionalElement(row, "td//button"))
                     .build();
             tableRows.add(taskRow);

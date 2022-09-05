@@ -20,6 +20,7 @@ import platform.qa.entities.Key;
 import platform.qa.entities.User;
 import platform.qa.officer.pages.DashboardPage;
 import platform.qa.officer.pages.LoginPage;
+import platform.qa.officer.panel.OfficerHeaderPanel;
 
 /**
  * Aggregated steps for login
@@ -30,5 +31,13 @@ public class LoginSteps {
         return new LoginPage()
                 .openAuthWithCesPage()
                 .readAndSignKey(userKey.getName(), userKey.getPassword(), userKey.getProvider());
+    }
+
+    public void logoutOfficerPortal() {
+        new OfficerHeaderPanel()
+                .clickOnHeaderName();
+        new OfficerHeaderPanel()
+                .clickOnUserInfoLink()
+                .clickLogOutButton();
     }
 }
