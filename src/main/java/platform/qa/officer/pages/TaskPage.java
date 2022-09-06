@@ -67,7 +67,6 @@ public class TaskPage extends CommonTaskPage {
             "/following-sibling::div//textarea";
     private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
             "following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
-    private final String submitButtonPath = "//button[@type=\"submit\"]";
 
     public TaskPage() {
         super();
@@ -94,14 +93,14 @@ public class TaskPage extends CommonTaskPage {
         wait.until(attributeContains(xpath(fieldXpath), "value", fieldData));
     }
 
-    public void checkSubmitButtonState(boolean isEnabled) {
-        wait.until(presenceOfElementLocated(xpath(submitButtonPath)));
+    public void checkSubmitButtonState(String buttonName, boolean isEnabled) {
+        wait.until(presenceOfElementLocated(xpath(format(buttonXpath, buttonName))));
         if (isEnabled) {
-            wait.until(elementToBeClickable(xpath(submitButtonPath)));
+            wait.until(elementToBeClickable(xpath(format(buttonXpath, buttonName))));
         } else {
-            wait.until(not(elementToBeClickable(xpath(submitButtonPath))));
+            wait.until(not(elementToBeClickable(xpath(format(buttonXpath, buttonName)))));
         }
-        log.info("Кнопка далі активна = " + driver.findElement(xpath(submitButtonPath)).isEnabled());
+        log.info("Кнопка далі активна = " + driver.findElement(xpath(format(buttonXpath, buttonName))).isEnabled());
     }
 
     public void selectDataFromDateTime(String fieldName, String fieldData) {

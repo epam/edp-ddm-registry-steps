@@ -16,6 +16,7 @@
 
 package platform.qa.officer.pages;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -26,13 +27,10 @@ import platform.qa.base.BasePage;
 
 import java.util.Arrays;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 
 public abstract class CommonTaskPage extends BasePage {
     protected By taskNameBy = xpath("//div[contains(@class, 'root')]//*[self::h1 or self::h2 or self::h3]");
-    @FindBy(xpath = "//button[contains(@name, 'data[submit]')]")
-    protected WebElement submitButton;
+    String buttonXpath = "//button[contains(text(),'%s')]";
 
     public CommonTaskPage() {
         loadingPage();
@@ -47,9 +45,9 @@ public abstract class CommonTaskPage extends BasePage {
         return (T) Arrays.stream(clazz.getConstructors()).findFirst().orElseThrow().newInstance();
     }
 
-    public void submitForm() {
+    public void clickButton(String buttonName) {
         wait
-                .until(elementToBeClickable(submitButton))
+                .until(elementToBeClickable(xpath(format(buttonXpath, buttonName))))
                 .click();
     }
 }

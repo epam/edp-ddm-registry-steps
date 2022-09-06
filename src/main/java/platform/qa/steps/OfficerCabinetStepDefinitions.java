@@ -108,11 +108,11 @@ public class OfficerCabinetStepDefinitions {
                 .clickOnProcessByName(processName);
     }
 
-    @Коли("бачить форму {string} із кнопкою \"Далі\" яка {booleanValue}")
-    public void verifyDisplayFormName(String formName, boolean isEnabled) {
+    @Коли("бачить форму {string} із кнопкою {string} яка {booleanValue}")
+    public void verifyDisplayFormName(String formName, String buttonName, boolean isEnabled) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
-                .checkSubmitButtonState(isEnabled);
+                .checkSubmitButtonState(buttonName, isEnabled);
     }
 
     @Коли("користувач заповнює форму даними$")
@@ -137,10 +137,10 @@ public class OfficerCabinetStepDefinitions {
                 .checkTaskName(TaskPage.class, formName);
     }
 
-    @Та("натискає кнопку \"Далі\"")
-    public void clickButton() {
+    @Та("натискає кнопку {string}")
+    public void clickButton(String buttonName) {
         new TaskPage()
-                .submitForm();
+                .clickButton(buttonName);
     }
 
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
