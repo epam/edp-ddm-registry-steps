@@ -34,6 +34,7 @@ import platform.qa.officer.pages.DashboardPage;
 import platform.qa.officer.pages.MyTasksPage;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
+import platform.qa.officer.panel.OfficerHeaderPanel;
 import platform.qa.officer.steps.LoginSteps;
 import platform.qa.providers.impl.RegistryUserProvider;
 
@@ -172,42 +173,40 @@ public class OfficerCabinetStepDefinitions {
 
     @Тоді("послуга {string} з ідентифікатором {string} відображена в наданих послугах")
     public void verifyServiceIdentifierDone(String processDefinitionName, String businessKey) {
-        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .clickOnProvisionedTasksTab()
                 .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
     }
 
     @Тоді("послуга {string} з ідентифікатором {string} знаходиться у статусі: Послуги у виконанні")
     public void verifyServiceIdentifierInProgress(String processDefinitionName, String businessKey) {
-        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
     }
 
     @Тоді("задача {string} за послугою {string} з ідентифікатором {string} знаходиться у статусі: Задачі для виконання")
     public void verifyTaskServiceIdentifierInProgress(String taskName, String processDefinitionName,
                                                      String businessKey) {
-        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
     }
 
     @Тоді("задача {string} за послугою {string} з ідентифікатором {string} виконана")
     public void verifyTaskServiceIdentifierDone(String taskName, String processDefinitionName, String businessKey) {
-        new MyTasksPage().getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .clickOnProvisionedTasksTab()
                 .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
     }
 
     @Тоді("приймає задачу {string} за послугою {string} з ідентифікатором {string}")
     public void acceptTask(String taskName, String processDefinitionName, String businessKey) {
-        new MyTasksPage()
-                .getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .acceptTask(processDefinitionName, businessKey, taskName);
     }
 
     @Тоді("виконує задачу {string} за послугою {string} з ідентифікатором {string}")
     public void submitTask(String taskName, String processDefinitionName, String businessKey) {
-        new MyTasksPage()
-                .getHeaderPanel().clickOnMyTasksLink()
+        new OfficerHeaderPanel().clickOnMyTasksLink()
                 .submitTask(processDefinitionName, businessKey, taskName);
     }
 
