@@ -30,7 +30,7 @@ import org.openqa.selenium.By;
 
 public abstract class CommonTaskPage extends BasePage {
     protected By taskNameBy = xpath("//div[contains(@class, 'root')]//*[self::h1 or self::h2 or self::h3]");
-    String buttonXpath = "//button[contains(text(),'%s')]";
+    String buttonXpath = "//button[contains(text(),\"%s\")]";
 
     public CommonTaskPage() {
         loadingPage();
