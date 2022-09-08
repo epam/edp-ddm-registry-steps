@@ -28,7 +28,6 @@ import platform.qa.officer.panel.OfficerHeaderPanel;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class MyTasksPage extends OfficerBasePage {
 
@@ -51,7 +50,7 @@ public class MyTasksPage extends OfficerBasePage {
     }
 
     public MyTasksPage acceptTask(String definitionName, String businessKey, String taskName) {
-        Row row = new Table().getRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
+        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
         WebElement actionButton = row.getActionButton();
         wait.until(textToBePresentInElement(actionButton, "Прийняти"));
         wait.until(elementToBeClickable(actionButton)).click();
@@ -59,7 +58,7 @@ public class MyTasksPage extends OfficerBasePage {
     }
 
     public TaskPage submitTask(String definitionName, String businessKey, String taskName) {
-        Row row = new Table().getRowByProcessBusinessKeyTaskName(definitionName,
+        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName,
                 businessKey, taskName);
         WebElement actionButton = row.getActionButton();
         wait.until(textToBePresentInElement(actionButton, "Виконати"));
@@ -69,29 +68,20 @@ public class MyTasksPage extends OfficerBasePage {
 
     public MyTasksPage checkTaskExistsByProcessBusinessKeyTaskName(String definitionName, String businessKey,
                                                                    String taskName) {
-        Row row = new Table().getRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
+        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
         assertThat(row).as(String.format("Немає запису з Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)",
                 definitionName, businessKey, taskName)).isNotNull();
         return this;
     }
 
     public MyTasksPage checkTaskExistsByTaskName(String taskName) {
-        wait
-                .withMessage(String.format("Задача \"%s\" відсутня у черзі задач", taskName))
-                .until((ExpectedCondition<Boolean>) d -> new Table()
-                        .getRowsFromTableByTaskName(taskName).size() > 0);
-        wait = getDefaultWebDriverWait();
+        new Table().getLastRowFromTableByTaskName(taskName);
         return this;
     }
 
     public MyTasksPage checkTaskExistsByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
                                                                             String businessKey) {
-        wait
-                .withMessage(String.format("Послуга \"%s\" з ідентифікатором \"%s\" відсутня у черзі задач",
-                        processDefinitionName, businessKey))
-                .until((ExpectedCondition<Boolean>) d -> new Table()
-                        .getRowsFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey).size() > 0);
-        wait = getDefaultWebDriverWait();
+        new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
         return this;
     }
 

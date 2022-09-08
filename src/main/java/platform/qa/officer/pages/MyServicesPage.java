@@ -16,9 +16,11 @@
 
 package platform.qa.officer.pages;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 import lombok.Getter;
+import platform.qa.officer.pages.components.Table;
 import platform.qa.officer.panel.OfficerHeaderPanel;
 
 import org.openqa.selenium.WebElement;
@@ -32,6 +34,8 @@ public class MyServicesPage extends OfficerBasePage {
     private final String myServicesTextUa = "Мої послуги";
     @FindBy(xpath = "//div[@data-xpath='header']/following-sibling::div//h1")
     private WebElement myServicesHeader;
+    @FindBy(xpath = "//button[@data-xpath='tabsButton-ended']")
+    private WebElement servicesProvidedTab;
 
     public MyServicesPage() {
         loadingPage();
@@ -41,6 +45,23 @@ public class MyServicesPage extends OfficerBasePage {
 
     public MyServicesPage checkMyServicesHeader() {
         wait.until(textToBePresentInElement(myServicesHeader, myServicesTextUa));
+        return this;
+    }
+
+    public MyServicesPage clickOnProvidedServicesTab() {
+        wait.until(elementToBeClickable(servicesProvidedTab)).click();
+        return new MyServicesPage();
+    }
+
+    public MyServicesPage checkProcessExistsByNameBusinessKeyAndResult(String processDefinitionName,
+                                                                       String businessKey, String result) {
+        new Table().getLastRowFromTableByProcessBusinessKeyAndResult(processDefinitionName, businessKey, result);
+        return this;
+    }
+
+    public MyServicesPage checkProcessExistsByNameAndBusinessKey(String processDefinitionName, String businessKey) {
+        new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
+                businessKey);
         return this;
     }
 }

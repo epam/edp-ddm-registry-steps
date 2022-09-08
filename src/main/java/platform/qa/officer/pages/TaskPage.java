@@ -228,5 +228,4 @@ public class TaskPage extends CommonTaskPage {
                 .click();
         return this;
     }
-
 }
