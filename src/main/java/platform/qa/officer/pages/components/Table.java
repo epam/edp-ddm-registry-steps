@@ -47,7 +47,7 @@ public class Table extends BasePage {
             Row taskRow = Row.builder()
                     .processDefinitionName(row.findElement(xpath("td[@id='processDefinitionName']")))
                     .businessKey(row.findElement(xpath("td[@id='businessKey']")))
-                    .taskDefinitionName(row.findElement(xpath("td[@id='name' or @id='taskDefinitionName']")))
+                    .taskDefinitionName(getOptionalElement(row, "td[@id='name' or @id='taskDefinitionName']"))
                     .startTime(row.findElement(xpath("td[@id='created' or @id='startTime']")))
                     .endTime(getOptionalElement(row, "td[@id='endTime']"))
                     .result(getOptionalElement(row, "td[@id='excerptResult' or @id='status.title']"))
