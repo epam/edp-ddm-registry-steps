@@ -65,6 +65,7 @@ public class TaskPage extends CommonTaskPage {
             "/following-sibling::div//button";
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
+    private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
     private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
             "following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
 
@@ -161,15 +162,12 @@ public class TaskPage extends CommonTaskPage {
 
     public void checkTextareaText(String fieldName, String fieldData) {
         By textarea = xpath(format(textAreaPath, fieldName));
-        wait.until(presenceOfElementLocated(textarea));
-        String[] textItems = driver.findElement(textarea)
-                .getText()
-                .split("\n");
-        wait.until((ExpectedCondition<Boolean>) driver ->
-                Arrays.stream(textItems)
-                        .map(String::trim)
-                        .collect(Collectors.joining("\n"))
-                        .equalsIgnoreCase(fieldData.trim()));
+        checkTextInsideBlock(textarea, fieldData);
+    }
+
+    public void checkContentText(String fieldData) {
+        By content = xpath(contentTextPath);
+        checkTextInsideBlock(content, fieldData);
     }
 
     public void setFieldsData(FieldData fieldData) {
@@ -227,5 +225,17 @@ public class TaskPage extends CommonTaskPage {
                 .until(elementToBeClickable(saveButton))
                 .click();
         return this;
+    }
+
+    private void checkTextInsideBlock(By textarea, String fieldData) {
+        wait.until(presenceOfElementLocated(textarea));
+        String[] textItems = driver.findElement(textarea)
+                .getText()
+                .split("\n");
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                Arrays.stream(textItems)
+                        .map(String::trim)
+                        .collect(Collectors.joining("\n"))
+                        .equalsIgnoreCase(fieldData.trim()));
     }
 }
