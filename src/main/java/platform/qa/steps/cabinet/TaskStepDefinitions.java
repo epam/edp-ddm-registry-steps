@@ -109,12 +109,12 @@ public class TaskStepDefinitions {
                 .clickButton(buttonName);
     }
 
-    /*@Та("на формі {string} бачить наступний текст:")
+    @Та("на формі {string} бачить наступний текст:")
     public void checkFormContent(String formName, String messageText) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
                 .checkContentText(messageText);
-    }*/
+    }
 
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
     public void checkMessage(String formName, String messageLabel, String messageText) {
