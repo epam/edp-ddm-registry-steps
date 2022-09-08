@@ -48,7 +48,7 @@ public class Request implements Comparable<Request> {
 
     public void setResultNewValueByKeyValue(String key, String oldValue, String newValue) {
         results.stream()
-                .filter(map -> map.get(key).equals(oldValue))
+                .filter(map -> map.get(key) != null && map.get(key).equals(oldValue))
                 .forEach(result -> result.put(key, newValue));
     }
 
