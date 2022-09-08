@@ -40,7 +40,7 @@ public class Row implements Comparable<Row> {
 
     @Override
     public int compareTo(Row otherRow) {
-        return convertDateTimeByPattern(getStartTime().getText(), "dd.mm.yyyy hh:mm")
-                .compareTo(convertDateTimeByPattern(otherRow.getStartTime().getText(), "dd.mm.yyyy hh:mm"));
+        return convertDateTimeByPattern(getStartTime().getText(), "dd.MM.yyyy HH:mm")
+                .compareTo(convertDateTimeByPattern(otherRow.getStartTime().getText(), "dd.MM.yyyy HH:mm"));
     }
 }
