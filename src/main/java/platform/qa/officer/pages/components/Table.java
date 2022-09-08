@@ -22,7 +22,6 @@ import platform.qa.base.BasePage;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
@@ -58,22 +57,36 @@ public class Table extends BasePage {
         });
     }
 
-    public List<Row> getRowsFromTableByTaskName(String taskName) {
+    public Row getLastRowFromTableByTaskName(String taskName) {
         return tableRows.stream()
                 .filter(row -> row.getTaskDefinitionName().getText().contains(taskName))
-                .collect(Collectors.toList());
+                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Задача \"%s\" "
+                        + "відсутня у черзі задач", taskName)));
     }
 
-    public List<Row> getRowsFromTableByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
-                                                                           String businessKey) {
+    public Row getLastRowFromTableByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
+                                                                        String businessKey) {
         return tableRows.stream()
                 .filter(row ->
                         row.getProcessDefinitionName().getText().contains(processDefinitionName) &&
                                 row.getBusinessKey().getText().contains(businessKey))
-                .collect(Collectors.toList());
+                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Послуга \"%s\" з "
+                        + "ідентифікатором \"%s\" відсутня в таблиці", processDefinitionName, businessKey)));
     }
 
-    public Row getRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName) {
+    public Row getLastRowFromTableByProcessBusinessKeyAndResult(String processDefinitionName,
+                                                                String businessKey, String result) {
+        return tableRows.stream()
+                .filter(row ->
+                        row.getProcessDefinitionName().getText().contains(processDefinitionName) &&
+                                row.getBusinessKey().getText().contains(businessKey) &&
+                                row.getResult().getText().contains(result))
+                .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Послуга \"%s\" з "
+                                + "ідентифікатором \"%s\" та результатом \"%s\" відсутня у черзі послуг",
+                        processDefinitionName, businessKey, result)));
+    }
+
+    public Row getLastRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName) {
         return tableRows.stream().filter(row -> row.getProcessDefinitionName().getText().equals(definitionName) &&
                         row.getBusinessKey().getText().equals(businessKey) && row.getTaskDefinitionName().getText().equals(taskName))
                 .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з "
