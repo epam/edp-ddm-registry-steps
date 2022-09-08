@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -250,15 +251,18 @@ public class RestApiStepDefinitions {
         var filteredRequests = context.stream()
                 .filter(request -> request.isResultContainsKeyWithNonNullValue(idColumnName))
                 .collect(Collectors.toList());
-
+        AtomicReference<String> deletedId = new AtomicReference<>();
         filteredRequests.stream()
                 .map(request -> request.getResultValueByKey(idColumnName))
                 .distinct()
-                .forEach(id -> executeDeleteApiWithId(userName, path, id));
+                .forEach(id -> {
+                    executeDeleteApiWithId(userName, path, id);
+                    deletedId.set(id);
+                });
 
         context.stream()
                 .filter(request -> request.isResultContainsKeyWithNonNullValue(idColumnName))
-                .forEach(request -> request.setResultValueByKey(idColumnName, null));
+                .forEach(request -> request.setResultNewValueByKeyValue(idColumnName, deletedId.get(), null));
 
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
