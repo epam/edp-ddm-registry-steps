@@ -47,12 +47,11 @@ public class Request implements Comparable<Request> {
         return resultMap.map(map -> String.valueOf(map.get(keyName))).orElse(null);
     }
 
-    public void setResultValueByKey(String key, String value) {
-        var resultList = results.stream()
-                .filter(map -> map.get(key) != null)
+    public void setResultNewValueByKeyValue(String key, String oldValue, String newValue) {
+        results.stream()
+                .filter(map -> map.get(key).equals(oldValue))
                 .map(map -> new HashMap(map))
-                .collect(Collectors.toList());
-        resultList.forEach(result -> result.put(key, value));
+                .forEach(result -> result.put(key, newValue));
     }
 
     public List<Map> getResultsContainsMap(Map mapToCheck) {
