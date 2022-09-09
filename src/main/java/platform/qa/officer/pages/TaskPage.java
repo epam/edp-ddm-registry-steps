@@ -245,7 +245,7 @@ public class TaskPage extends CommonTaskPage {
     }
 
     private String getTrimTextWithoutEmptyLines(String inputText) {
-        var text = inputText.replaceAll("(?m)^[ \t]*\r?\n", "");
+        var text = inputText.replaceAll("(?m)^[ \t]*\r?\n", "").trim();
         return Arrays.stream(text.split("\n"))
                 .map(String::trim)
                 .collect(Collectors.joining("\n"));
