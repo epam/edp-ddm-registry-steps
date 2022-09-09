@@ -230,19 +230,24 @@ public class TaskPage extends CommonTaskPage {
 
     private void checkTextInsideBlock(By textarea, String fieldData) {
         wait.until(presenceOfElementLocated(textarea));
-        String textItems = Arrays.stream(driver.findElement(textarea).getText().split("\n"))
-                .map(String::trim)
-                .collect(Collectors.joining("\n"));
+        String actualText = getTrimTextWithoutEmptyLines(driver.findElement(textarea).getText());
+        String expectedText = getTrimTextWithoutEmptyLines(fieldData);
         wait.until(
                 new ExpectedCondition<Boolean>() {
                     public Boolean apply(WebDriver driver) {
-                        return textItems.equalsIgnoreCase(fieldData.trim());
+                        return actualText.equalsIgnoreCase(expectedText);
                     }
 
                     public String toString() {
-                        return String.format("text ('%s') should be equal ignore case to ('%s')", textItems,
-                                fieldData.trim());
+                        return String.format("Expected text ('%s') but was ('%s')", actualText, expectedText);
                     }
                 });
+    }
+
+    private String getTrimTextWithoutEmptyLines(String fieldData) {
+        return Arrays.stream(fieldData.split("\n"))
+                .map(String::trim)
+                .collect(Collectors.joining("\n"))
+                .replaceAll("(?m)^[ \t]*\r?\n", "");
     }
 }
