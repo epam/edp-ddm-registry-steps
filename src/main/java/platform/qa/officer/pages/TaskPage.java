@@ -39,6 +39,7 @@ import platform.qa.officer.pages.components.Select;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -229,13 +230,19 @@ public class TaskPage extends CommonTaskPage {
 
     private void checkTextInsideBlock(By textarea, String fieldData) {
         wait.until(presenceOfElementLocated(textarea));
-        String[] textItems = driver.findElement(textarea)
-                .getText()
-                .split("\n");
-        wait.until((ExpectedCondition<Boolean>) driver ->
-                Arrays.stream(textItems)
-                        .map(String::trim)
-                        .collect(Collectors.joining("\n"))
-                        .equalsIgnoreCase(fieldData.trim()));
+        String textItems = Arrays.stream(driver.findElement(textarea).getText().split("\n"))
+                .map(String::trim)
+                .collect(Collectors.joining("\n"));
+        wait.until(
+                new ExpectedCondition<Boolean>() {
+                    public Boolean apply(WebDriver driver) {
+                        return textItems.equalsIgnoreCase(fieldData.trim());
+                    }
+
+                    public String toString() {
+                        return String.format("text ('%s') should be equal ignore case to ('%s')", textItems,
+                                fieldData.trim());
+                    }
+                });
     }
 }
