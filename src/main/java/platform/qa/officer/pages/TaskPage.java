@@ -244,10 +244,11 @@ public class TaskPage extends CommonTaskPage {
                 });
     }
 
-    private String getTrimTextWithoutEmptyLines(String fieldData) {
-        return Arrays.stream(fieldData.split("\n"))
+    private String getTrimTextWithoutEmptyLines(String inputText) {
+        var text = inputText.replaceAll("(?m)^[ \t]*\r?\n", "");
+        return Arrays.stream(text.split("\n"))
                 .map(String::trim)
-                .collect(Collectors.joining("\n"))
-                .replaceAll("(?m)^[ \t]*\r?\n", "");
+                .collect(Collectors.joining("\n"));
+
     }
 }
