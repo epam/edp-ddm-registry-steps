@@ -18,17 +18,14 @@ package platform.qa.steps.cabinet;
 
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Коли;
-import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.officer.pages.AvailableServicesPage;
 import platform.qa.officer.pages.DashboardPage;
-import platform.qa.providers.impl.RegistryUserProvider;
 
 /**
  * Cucumber step definitions for cabinet portal available services page
  */
 public class AvailableServicesStepDefinitions {
-    private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
     public AvailableServicesStepDefinitions(TestContext testContext) {

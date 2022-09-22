@@ -20,9 +20,11 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 import lombok.Getter;
+import platform.qa.officer.pages.components.Row;
 import platform.qa.officer.pages.components.Table;
 import platform.qa.officer.panel.OfficerHeaderPanel;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -62,6 +64,16 @@ public class MyServicesPage extends OfficerBasePage {
     public MyServicesPage checkProcessExistsByNameAndBusinessKey(String processDefinitionName, String businessKey) {
         new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
                 businessKey);
+        return this;
+    }
+
+    public MyServicesPage downloadExcerpt(String processDefinitionName, String businessKey) {
+        Row serviceRow = new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
+                businessKey);
+        WebElement excerptButton = serviceRow.getResult().findElement(By.xpath("//button"));
+        wait.until(elementToBeClickable(excerptButton));
+        wait.until(textToBePresentInElement(excerptButton, "Завантажити витяг"));
+        excerptButton.click();
         return this;
     }
 }

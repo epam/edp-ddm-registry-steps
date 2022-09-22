@@ -17,16 +17,13 @@
 package platform.qa.steps.cabinet;
 
 import io.cucumber.java.uk.Тоді;
-import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.officer.panel.OfficerHeaderPanel;
-import platform.qa.providers.impl.RegistryUserProvider;
 
 /**
  * Cucumber step definitions for cabinet portal MyServices page
  */
 public class MyServicesStepDefinitions {
-    private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
     public MyServicesStepDefinitions(TestContext testContext) {
@@ -45,4 +42,6 @@ public class MyServicesStepDefinitions {
         new OfficerHeaderPanel().clickOnMyServicesLink()
                 .checkProcessExistsByNameAndBusinessKey(processDefinitionName, businessKey);
     }
+
+
 }
