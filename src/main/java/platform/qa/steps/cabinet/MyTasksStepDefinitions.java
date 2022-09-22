@@ -17,17 +17,14 @@
 package platform.qa.steps.cabinet;
 
 import io.cucumber.java.uk.Тоді;
-import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.officer.pages.MyTasksPage;
 import platform.qa.officer.panel.OfficerHeaderPanel;
-import platform.qa.providers.impl.RegistryUserProvider;
 
 /**
  * Cucumber step definitions for cabinet portal MyTasks page
  */
 public class MyTasksStepDefinitions {
-    private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
     public MyTasksStepDefinitions(TestContext testContext) {

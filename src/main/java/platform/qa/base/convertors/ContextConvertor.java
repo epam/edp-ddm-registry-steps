@@ -60,6 +60,17 @@ public class ContextConvertor {
     }
 
     /**
+     * @param context  - Scenario context to convert
+     * @return - converted context to File
+     */
+    public static File convertToFile(Object context) {
+        if (context instanceof File) {
+            return (File) context;
+        }
+        return null;
+    }
+
+    /**
      * @param context - Scenario context to convert
      * @return - converted context to List<String>
      */
