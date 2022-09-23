@@ -9,6 +9,7 @@ import static platform.qa.enums.Context.LAST_DOWNLOAD_FILE;
 
 import io.cucumber.java.uk.Тоді;
 import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
 import platform.qa.base.providers.WebDriverProvider;
 import platform.qa.base.utils.CustomFileUtils;
 import platform.qa.cucumber.TestContext;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 
+@Log4j2
 public class ExcerptStepDefinitions {
     public static final int WAIT_FILE_LOAD = 30;
     public static final int POOL_INTERVAL = 1;
@@ -56,6 +58,7 @@ public class ExcerptStepDefinitions {
                 .filter(file -> !beforeLoadFiles.contains(file))
                 .max(Comparator.comparing(CustomFileUtils::getFileModifiedTime))
                 .orElseThrow();
+        log.info("Excerpt file to compare: " + downloadedExcerptFile.getAbsolutePath());
         testContext.getScenarioContext().setContext(LAST_DOWNLOAD_FILE, downloadedExcerptFile);
     }
 
