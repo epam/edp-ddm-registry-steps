@@ -70,7 +70,7 @@ public class MyServicesPage extends OfficerBasePage {
     public MyServicesPage downloadExcerpt(String processDefinitionName, String businessKey) {
         Row serviceRow = new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
                 businessKey);
-        WebElement excerptButton = serviceRow.getResult().findElement(By.xpath("//button"));
+        WebElement excerptButton = serviceRow.getResult().findElement(By.xpath("div/button"));
         wait.until(elementToBeClickable(excerptButton));
         wait.until(textToBePresentInElement(excerptButton, "Завантажити витяг"));
         excerptButton.click();
