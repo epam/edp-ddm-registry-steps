@@ -16,6 +16,7 @@
 
 package platform.qa.base.utils;
 
+import static com.google.common.base.CharMatcher.invisible;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -129,7 +130,8 @@ public class CustomFileUtils {
                         .subList(1, allRecords.size()).stream()
                         .map(line -> IntStream.range(0, line.length)
                                 .boxed()
-                                .collect(toMap(i -> headers[i].trim(), i -> line[i].trim())))
+                                .collect(toMap(i -> invisible().removeFrom(headers[i].trim()),
+                                        i -> invisible().removeFrom(line[i].trim()))))
                         .collect(toList());
             }
 
