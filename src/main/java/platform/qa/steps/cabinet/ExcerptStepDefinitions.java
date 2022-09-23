@@ -34,7 +34,8 @@ public class ExcerptStepDefinitions {
 
     @Тоді("завантажує витяг послуги {string} з ідентифікатором {string}")
     public void downloadExcerpt(String processDefinitionName, String businessKey) {
-        List<File> files = (List<File>) FileUtils.listFiles(FileUtils.getUserDirectory(), null, true);
+        File downloadDir = new File(WebDriverProvider.chromeDownloadPath);
+        List<File> files = (List<File>) FileUtils.listFiles(downloadDir, null, true);
         testContext.getScenarioContext().setContext(DOWNLOAD_FILES, files);
         new OfficerHeaderPanel().clickOnMyServicesLink()
                 .clickOnProvidedServicesTab()
@@ -44,7 +45,7 @@ public class ExcerptStepDefinitions {
     @Тоді("витяг послуги {string} з ідентифікатором {string} завантажено")
     public void checkExcerptDownloaded(String processDefinitionName, String businessKey) {
         List<File> beforeLoadFiles = convertToFileList(testContext.getScenarioContext().getContext(DOWNLOAD_FILES));
-        File downloadDir = new File(WebDriverProvider.downloadPath);
+        File downloadDir = new File(WebDriverProvider.chromeDownloadPath);
         await()
                 .atMost(Duration.ofSeconds(WAIT_FILE_LOAD))
                 .pollInterval(Duration.ofSeconds(POOL_INTERVAL))

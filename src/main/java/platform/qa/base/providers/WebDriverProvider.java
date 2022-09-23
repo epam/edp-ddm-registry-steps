@@ -39,7 +39,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 public class WebDriverProvider {
     protected static RunUITestConfiguration runUITestConfig = RunUITestConfiguration.getInstance();
     private static WebDriver instance;
-    public static String downloadPath = FileUtils.getUserDirectoryPath() + File.separator +"load-chrome";
+    public static String chromeDownloadPath = FileUtils.getUserDirectoryPath() + File.separator +"load-chrome";
 
     public static WebDriver getInstance() {
         if (instance == null) {
@@ -59,9 +59,9 @@ public class WebDriverProvider {
     @SneakyThrows
     private static WebDriver getDriver() {
         HashMap<String, Object> chromePrefs = new HashMap<>();
-        FileUtils.forceMkdir(new File(downloadPath));
+        FileUtils.forceMkdir(new File(chromeDownloadPath));
         chromePrefs.put("profile.default_content_settings.popups", 0);
-        chromePrefs.put("download.default_directory", downloadPath);
+        chromePrefs.put("download.default_directory", chromeDownloadPath);
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
 
