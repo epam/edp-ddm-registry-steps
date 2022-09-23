@@ -130,8 +130,8 @@ public class CustomFileUtils {
                         .subList(1, allRecords.size()).stream()
                         .map(line -> IntStream.range(0, line.length)
                                 .boxed()
-                                .collect(toMap(i -> invisible().removeFrom(headers[i].trim()),
-                                        i -> invisible().removeFrom(line[i].trim()))))
+                                .collect(toMap(i -> invisible().trimFrom(headers[i]),
+                                        i -> invisible().trimFrom(line[i]))))
                         .collect(toList());
             }
 
