@@ -47,7 +47,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class TaskPage extends CommonTaskPage {
 
-    @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
+    @FindBy(xpath = "//button[contains(@ref, 'saveRow')]")
     protected WebElement saveButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
@@ -68,7 +68,7 @@ public class TaskPage extends CommonTaskPage {
             "/following-sibling::div//textarea";
     private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
     private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
-            "following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
+            "following-sibling::button";
 
     public TaskPage() {
         super();
