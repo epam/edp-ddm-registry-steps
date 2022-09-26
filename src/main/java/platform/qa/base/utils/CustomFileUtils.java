@@ -114,7 +114,8 @@ public class CustomFileUtils {
     public static List<Map<String, String>> parseCsvFile(File file) {
         CSVParser parser = new CSVParserBuilder()
                 .withSeparator(',')
-                .withIgnoreQuotations(true)
+                .withIgnoreQuotations(false)
+                .withIgnoreLeadingWhiteSpace(true)
                 .build();
         List<Map<String, String>> results = new LinkedList<>();
 
