@@ -48,7 +48,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//button[contains(@ref, 'saveRow')]")
-    protected WebElement saveButton;
+    protected WebElement saveRawEditGridButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -67,7 +67,7 @@ public class TaskPage extends CommonTaskPage {
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
     private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
-    private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
+    private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
             "following-sibling::button";
 
     public TaskPage() {
@@ -215,15 +215,15 @@ public class TaskPage extends CommonTaskPage {
                 .click();
     }
 
-    public void clickAddButton(String gridName) {
+    public void clickAddRawEditGridButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(format(addButtonPath, gridName))))
+                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName))))
                 .click();
     }
 
-    public TaskPage clickSaveButton() {
+    public TaskPage clickSaveRawEditGridButton() {
         wait
-                .until(elementToBeClickable(saveButton))
+                .until(elementToBeClickable(saveRawEditGridButton))
                 .click();
         return this;
     }
