@@ -42,6 +42,7 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import com.opencsv.exceptions.CsvException;
 
 @Log4j2
@@ -116,6 +117,8 @@ public class CustomFileUtils {
                 .withSeparator(',')
                 .withIgnoreQuotations(false)
                 .withIgnoreLeadingWhiteSpace(true)
+                .withQuoteChar('"')
+                .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_QUOTES)
                 .build();
         List<Map<String, String>> results = new LinkedList<>();
 
