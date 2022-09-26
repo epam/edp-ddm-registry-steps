@@ -140,12 +140,12 @@ public class TaskStepDefinitions {
     public void userFillGridFieldsWithData(String gridName, List<FieldData> rows) {
         TaskPage taskPage = new TaskPage();
         taskPage
-                .clickAddButton(gridName);
+                .clickAddRawEditGridButton(gridName);
         for (FieldData fieldData : rows) {
             taskPage
                     .setFieldsData(fieldData);
         }
         taskPage
-                .clickSaveButton();
+                .clickSaveRawEditGridButton();
     }
 }
