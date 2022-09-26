@@ -1,5 +1,6 @@
 package platform.qa.steps.cabinet;
 
+import static java.util.Objects.isNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static platform.qa.base.convertors.ContextConvertor.convertToFile;
@@ -20,7 +21,9 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Log4j2
 public class ExcerptStepDefinitions {
@@ -66,8 +69,13 @@ public class ExcerptStepDefinitions {
     public void checkCSVExcerptContainsData(@NonNull List<Map<String, String>> excerptExpectedData) {
         File excerptFile =
                 convertToFile(testContext.getScenarioContext().getContext(LAST_DOWNLOAD_FILE));
-        List<Map<String, String>> resultList = CustomFileUtils.parseCsvFile(excerptFile);
-        assertThat(resultList).as("Excerpt doesn't contain expected data").containsAll(excerptExpectedData);
+        List<Map<String, String>> actualResultList = CustomFileUtils.parseCsvFile(excerptFile);
+        List<Map<String, String>> expectedResultList = excerptExpectedData.stream()
+                .map(map -> map.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> isNull(entry.getValue()) ?
+                                StringUtils.EMPTY : entry.getValue())))
+                .collect(Collectors.toList());
+        assertThat(actualResultList).as("Excerpt doesn't contain expected data").containsAll(expectedResultList);
     }
 
 }
