@@ -47,7 +47,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class TaskPage extends CommonTaskPage {
 
-    @FindBy(xpath = "//button[contains(@ref, 'saveRow')]")
+    @FindBy(xpath = "//button[contains(@ref, 'saveRow')] | //div[contains(@role, 'dialog')]"
+            + "//button[contains(@type, 'submit')]")
     protected WebElement saveRawEditGridButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
@@ -67,8 +68,9 @@ public class TaskPage extends CommonTaskPage {
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
     private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
-    private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
-            "following-sibling::button";
+    private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::"
+            + "button | //label[text()[contains(.,\"%s\")]]/following-sibling::div/div[contains(@data-xpath, "
+            + "'Grid]')]/div/following-sibling::button";
 
     public TaskPage() {
         super();
@@ -249,6 +251,5 @@ public class TaskPage extends CommonTaskPage {
         return Arrays.stream(text.split("\n"))
                 .map(String::trim)
                 .collect(Collectors.joining("\n"));
-
     }
 }
