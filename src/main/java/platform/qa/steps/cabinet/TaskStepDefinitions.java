@@ -16,13 +16,11 @@
 
 package platform.qa.steps.cabinet;
 
-import static platform.qa.enums.Context.API_RESULTS;
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
 import static platform.qa.enums.Context.RANDOM_VALUE;
 
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
-import io.cucumber.java.bs.I;
 import io.cucumber.java.uk.І;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Та;
@@ -40,8 +38,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Random;
 import org.apache.commons.lang.RandomStringUtils;
 
 /**
@@ -167,7 +163,7 @@ public class TaskStepDefinitions {
         }
     }
 
-    @I("користувач генерує випадкові дані з {string} у кількості {int}")
+    @І("користувач генерує випадкові дані з {string} у кількості {int}")
     public void createRandomValue(String valueType, int amount) {
         String randomValue;
         switch (getValueType(valueType)){
