@@ -172,6 +172,7 @@ public class TaskStepDefinitions {
         switch (getValueType(valueType)){
             case DIGIT:
                 randomValue  = RandomStringUtils.randomNumeric(amount);
+                break;
             case LETTER:
                 randomValue  = RandomStringUtils.randomAlphabetic(amount);
                 break;
