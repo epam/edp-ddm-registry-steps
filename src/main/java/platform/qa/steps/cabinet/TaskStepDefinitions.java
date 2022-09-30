@@ -87,6 +87,9 @@ public class TaskStepDefinitions {
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
         for (FieldData fieldData : rows) {
+            if  (fieldData.getValue().equals("random")){
+                fieldData.setValue((String) testContext.getScenarioContext().getContext(RANDOM_VALUE));
+            }
             new TaskPage()
                     .setFieldsData(fieldData);
         }
