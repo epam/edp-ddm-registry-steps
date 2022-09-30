@@ -16,10 +16,13 @@
 
 package platform.qa.steps.cabinet;
 
+import static platform.qa.enums.Context.API_RESULTS;
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
+import static platform.qa.enums.Context.RANDOM_VALUE;
 
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
+import io.cucumber.java.bs.I;
 import io.cucumber.java.uk.І;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Та;
@@ -27,6 +30,7 @@ import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
 import platform.qa.enums.FieldType;
+import platform.qa.enums.ValueType;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
 import platform.qa.providers.impl.RegistryUserProvider;
@@ -36,6 +40,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Random;
+import org.apache.commons.lang.RandomStringUtils;
 
 /**
  * Cucumber step definitions for cabinet portal different task (forms)
@@ -147,5 +154,31 @@ public class TaskStepDefinitions {
         }
         taskPage
                 .clickSaveRawEditGridButton();
+    }
+
+    private ValueType getValueType(String entry) {
+        try {
+            return Arrays.stream(ValueType.values())
+                    .filter(value -> value.getValueType().equals(entry))
+                    .findFirst()
+                    .orElseThrow();
+        } catch (NoSuchElementException ex) {
+            return ValueType.valueOf(entry);
+        }
+    }
+
+    @I("користувач генерує випадкові дані з {string} у кількості {int}")
+    public void createRandomValue(String valueType, int amount) {
+        String randomValue;
+        switch (getValueType(valueType)){
+            case DIGIT:
+                randomValue  = RandomStringUtils.randomNumeric(amount);
+            case LETTER:
+                randomValue  = RandomStringUtils.randomAlphabetic(amount);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + getValueType(valueType));
+        }
+        testContext.getScenarioContext().setContext(RANDOM_VALUE,randomValue);
     }
 }

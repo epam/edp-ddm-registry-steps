@@ -16,15 +16,23 @@
 
 package platform.qa.enums;
 
-public enum Context {
-    API_RESULTS,
-    BPMN_FILE_NAMES,
-    BPMN_FORM_KEY_LIST,
-    BPMN_PROCESS_NAME_LIST,
-    API_FORM_KEY_LIST,
-    API_PROCESS_NAME_LIST,
-    OFFICER_USER_LOGIN,
-    DOWNLOAD_FILES,
-    LAST_DOWNLOAD_FILE,
-    RANDOM_VALUE
+
+import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+@Getter
+public enum ValueType {
+    DIGIT ("цифр"),
+    LETTER("літер");
+
+    private final String valueType;
+
+    ValueType(String valueType) {
+        this.valueType = valueType;
+    }
+    public String getValueType() {
+        return this.valueType;
+    }
 }
