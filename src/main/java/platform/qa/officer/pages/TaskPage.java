@@ -31,10 +31,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static platform.qa.enums.Context.RANDOM_VALUE;
 
 import lombok.extern.log4j.Log4j2;
-import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
 
@@ -73,12 +71,6 @@ public class TaskPage extends CommonTaskPage {
     private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::"
             + "button | //label[text()[contains(.,\"%s\")]]/following-sibling::div/div[contains(@data-xpath, "
             + "'Grid]')]/div/following-sibling::button";
-
-    private TestContext testContext;
-
-    public TaskPage(TestContext testContext) {
-        this.testContext = testContext;
-    }
 
     public TaskPage() {
         super();
@@ -190,10 +182,7 @@ public class TaskPage extends CommonTaskPage {
                 checkCheckBox(fieldData.getName(), fieldData.getValue());
                 break;
             case INPUT:
-                String inputValue = fieldData.getValue().equals("random")
-                        ? (String) testContext.getScenarioContext().getContext(RANDOM_VALUE)
-                        : fieldData.getValue();
-                fillInputFieldWithData(fieldData.getName(), inputValue);
+                fillInputFieldWithData(fieldData.getName(), fieldData.getValue());
                 break;
             case SELECT:
                 new Select().selectItemFromDropDown(fieldData.getName(), fieldData.getValue());
