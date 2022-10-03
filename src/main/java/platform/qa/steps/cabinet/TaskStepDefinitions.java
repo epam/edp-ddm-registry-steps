@@ -175,7 +175,7 @@ public class TaskStepDefinitions {
         }
     }
 
-    @І("користувач генерує випадкові дані з {string} у кількості {int} та записує у змінну {string}")
+    @І("користувач генерує випадкові дані з {randomValueType} у кількості {int} та записує у змінну {string}")
     public void createRandomValue(String valueType, int amount, String randomValueKey) {
         var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
         String randomValueData;
