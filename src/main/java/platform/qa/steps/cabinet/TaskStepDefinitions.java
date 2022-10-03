@@ -18,8 +18,6 @@ package platform.qa.steps.cabinet;
 
 import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static platform.qa.base.convertors.ContextConvertor.convertToRandomMapContext;
-import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
-import static platform.qa.enums.Context.API_RESULTS;
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
 import static platform.qa.enums.Context.RANDOM_VALUE_MAP;
 
@@ -31,20 +29,19 @@ import io.cucumber.java.uk.Та;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
-import platform.qa.entities.context.Request;
 import platform.qa.enums.FieldType;
 import platform.qa.enums.ValueType;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
 import platform.qa.providers.impl.RegistryUserProvider;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import javax.naming.ldap.HasControls;
 import org.apache.commons.lang.RandomStringUtils;
 
 /**
@@ -93,10 +90,10 @@ public class TaskStepDefinitions {
 
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
-        var randomValueMap = (HashMap<String,String>) testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP);
+        var randomValueMap = (HashMap<?,?>) testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP);
         for (FieldData fieldData : rows) {
             if  (fieldData.getValue().startsWith("{")){
-                fieldData.setValue(randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
+                fieldData.setValue((String) randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
             }
             new TaskPage()
                     .setFieldsData(fieldData);
