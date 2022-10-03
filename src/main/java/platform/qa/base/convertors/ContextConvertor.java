@@ -89,10 +89,9 @@ public class ContextConvertor {
     }
 
     public static HashMap<String, String> convertToRandomMapContext(Object context) {
-        if (context instanceof HashMap<?,?>){
-           return (HashMap<String,String>) context;
-        }
         var convertedContext = new HashMap<String, String>();
+        if (context instanceof HashMap){
+           return (HashMap<String, String>) context;}
         return convertedContext;
     }
 }
