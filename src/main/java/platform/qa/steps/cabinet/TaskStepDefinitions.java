@@ -16,6 +16,7 @@
 
 package platform.qa.steps.cabinet;
 
+import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
 import static platform.qa.enums.Context.RANDOM_VALUE;
 
@@ -34,6 +35,7 @@ import platform.qa.officer.pages.TaskPage;
 import platform.qa.providers.impl.RegistryUserProvider;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -86,9 +88,10 @@ public class TaskStepDefinitions {
 
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
+        var randomValueMap = (HashMap<String,String>) testContext.getScenarioContext().getContext(RANDOM_VALUE);
         for (FieldData fieldData : rows) {
-            if  (fieldData.getValue().equals("random")){
-                fieldData.setValue((String) testContext.getScenarioContext().getContext(RANDOM_VALUE));
+            if  (fieldData.getValue().startsWith("{")){
+                fieldData.setValue(randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
             }
             new TaskPage()
                     .setFieldsData(fieldData);
@@ -155,6 +158,10 @@ public class TaskStepDefinitions {
                 .clickSaveRawEditGridButton();
     }
 
+    @ParameterType(value = "цифр|літер")
+    public ValueType randomValueType(String value) {
+        return getValueType(value);    }
+
     private ValueType getValueType(String entry) {
         try {
             return Arrays.stream(ValueType.values())
@@ -166,19 +173,21 @@ public class TaskStepDefinitions {
         }
     }
 
-    @І("користувач генерує випадкові дані з {string} у кількості {int}")
-    public void createRandomValue(String valueType, int amount) {
-        String randomValue;
+    @І("користувач генерує випадкові дані з {string} у кількості {int} та записує у змінну {string}")
+    public void createRandomValue(String valueType, int amount, String randomValueKey) {
+        var randomValueMap = new HashMap<String,String>();
+        String randomValueData;
         switch (getValueType(valueType)){
             case DIGIT:
-                randomValue  = RandomStringUtils.randomNumeric(amount);
+                randomValueData  = RandomStringUtils.randomNumeric(amount);
                 break;
             case LETTER:
-                randomValue  = RandomStringUtils.randomAlphabetic(amount);
+                randomValueData  = RandomStringUtils.randomAlphabetic(amount);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + getValueType(valueType));
         }
-        testContext.getScenarioContext().setContext(RANDOM_VALUE,randomValue);
+        randomValueMap.put(randomValueKey,randomValueData);
+        testContext.getScenarioContext().setContext(RANDOM_VALUE,randomValueMap);
     }
 }
