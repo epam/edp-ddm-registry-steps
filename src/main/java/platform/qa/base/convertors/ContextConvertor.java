@@ -20,6 +20,7 @@ import platform.qa.entities.context.Request;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,11 @@ public class ContextConvertor {
                     .map(item -> (String) item)
                     .collect(Collectors.toList());
         }
+        return convertedContext;
+    }
+
+    public static HashMap<String, String> convertToRandomMapContext(Object context) {
+        var convertedContext = new HashMap<String, String>();
         return convertedContext;
     }
 }
