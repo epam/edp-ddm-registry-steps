@@ -26,5 +26,5 @@ public enum Context {
     OFFICER_USER_LOGIN,
     DOWNLOAD_FILES,
     LAST_DOWNLOAD_FILE,
-    RANDOM_VALUE
+    RANDOM_VALUE_MAP
 }
