@@ -89,10 +89,10 @@ public class TaskStepDefinitions {
 
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
-        var randomValueMap = (HashMap<?, ?>) testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP);
+        var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
         for (FieldData fieldData : rows) {
             if (fieldData.getValue().startsWith("{")) {
-                fieldData.setValue((String) randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
+                fieldData.setValue(randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
             }
             new TaskPage()
                     .setFieldsData(fieldData);

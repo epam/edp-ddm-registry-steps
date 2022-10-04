@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ContextConvertor {
@@ -91,7 +92,10 @@ public class ContextConvertor {
     public static HashMap<String, String> convertToRandomMapContext(Object context) {
         var convertedContext = new HashMap<String, String>();
         if (context instanceof HashMap) {
-            return (HashMap<String, String>) context;
+            var collectedMap = ((Map<?, ?>)context).entrySet().stream()
+                    .collect(Collectors.toMap(entry->String.valueOf(entry.getKey()),entry->String.valueOf(entry.getValue())));
+            convertedContext.putAll(collectedMap);
+            return convertedContext;
         }
         return convertedContext;
     }
