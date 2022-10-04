@@ -33,4 +33,5 @@ public enum ValueType {
     public String getValueType() {
         return this.valueType;
     }
+
 }
