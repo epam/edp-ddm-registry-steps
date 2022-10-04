@@ -176,10 +176,10 @@ public class TaskStepDefinitions {
     }
 
     @І("користувач генерує випадкові дані з {randomValueType} у кількості {int} та записує у змінну {string}")
-    public void createRandomValue(String valueType, int amount, String randomValueKey) {
+    public void createRandomValue(ValueType valueType, int amount, String randomValueKey) {
         var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
         String randomValueData;
-        switch (getValueType(valueType)) {
+        switch (valueType) {
             case DIGIT:
                 randomValueData = RandomStringUtils.randomNumeric(amount);
                 break;
@@ -187,7 +187,7 @@ public class TaskStepDefinitions {
                 randomValueData = RandomStringUtils.randomAlphabetic(amount);
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + getValueType(valueType));
+                throw new IllegalStateException("Unexpected value: " + valueType);
         }
         randomValueMap.put(randomValueKey, randomValueData);
         testContext.getScenarioContext().setContext(RANDOM_VALUE_MAP, randomValueMap);
