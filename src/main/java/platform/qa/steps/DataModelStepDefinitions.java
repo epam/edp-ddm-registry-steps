@@ -32,8 +32,10 @@ import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
@@ -119,15 +121,13 @@ public class DataModelStepDefinitions {
         var actualResult = getLastRequest(context, path).getResults();
 
         List<String> actualSortingFieldValues = new ArrayList<>();
-        for (Map map :
-                actualResult) {
+        for (Map map : actualResult) {
             actualSortingFieldValues.add(map.get(sortingFieldName).toString());
         }
 
-        List<String> sortedActualSortingFieldValues =
-                actualSortingFieldValues.stream()
-                        .sorted()
-                        .collect(Collectors.toList());
+        List<String> sortedActualSortingFieldValues = actualSortingFieldValues;
+
+        sortedActualSortingFieldValues.sort((o1, o2) -> Collator.getInstance(new Locale("uk", "UA")).compare(o1.toLowerCase(), o2.toLowerCase()));
 
         Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
