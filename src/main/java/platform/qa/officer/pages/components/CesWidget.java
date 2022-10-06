@@ -16,7 +16,6 @@
 
 package platform.qa.officer.pages.components;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
@@ -74,7 +73,7 @@ public class CesWidget extends BasePage {
         wait.until(elementToBeClickable(providerSelect));
         wait.until(elementToBeClickable(keyInput));
         wait.until(ExpectedConditions.attributeToBe(keyPasswordInput, "disabled", "true"));
-        assertThat(readKeyButton.getAttribute("disabled")).isEqualTo("true");
+        wait.until(ExpectedConditions.attributeToBe(readKeyButton, "disabled", "true"));
 
         return this;
     }

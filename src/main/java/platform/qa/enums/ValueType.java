@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package platform.qa.officer.panel;
+package platform.qa.enums;
 
-import platform.qa.base.BasePage;
-import platform.qa.officer.pages.LoginPage;
 
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import lombok.Getter;
 
-public class UserInfoPopUp extends BasePage {
+import java.util.Arrays;
+import java.util.Optional;
 
-    @FindBy(xpath = "//li[@data-xpath='logoutButton']")
-    private WebElement logOutButton;
+@Getter
+public enum ValueType {
+    DIGIT ("цифр"),
+    LETTER("літер");
 
-    public LoginPage clickLogOutButton() {
-        wait.until(ExpectedConditions.elementToBeClickable(logOutButton)).click();
-        return new LoginPage();
+    private final String valueType;
+
+    ValueType(String valueType) {
+        this.valueType = valueType;
     }
+    public String getValueType() {
+        return this.valueType;
+    }
+
 }

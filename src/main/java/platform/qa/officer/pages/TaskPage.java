@@ -39,6 +39,7 @@ import platform.qa.officer.pages.components.Select;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -46,8 +47,9 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 @Log4j2
 public class TaskPage extends CommonTaskPage {
 
-    @FindBy(xpath = "//div[contains(@role, 'dialog')]//button[contains(@type, 'submit')]")
-    protected WebElement saveButton;
+    @FindBy(xpath = "//button[contains(@ref, 'saveRow')] | //div[contains(@role, 'dialog')]"
+            + "//button[contains(@type, 'submit')]")
+    protected WebElement saveRawEditGridButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -65,9 +67,10 @@ public class TaskPage extends CommonTaskPage {
             "/following-sibling::div//button";
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
-    private final String addButtonPath = "//label[text()[contains(.,\"%s\")]]/" +
-            "following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
-    private final String submitButtonPath = "//button[@type=\"submit\"]";
+    private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
+    private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::"
+            + "button | //label[text()[contains(.,\"%s\")]]/following-sibling::div/div[contains(@data-xpath, "
+            + "'Grid]')]/div/following-sibling::button";
 
     public TaskPage() {
         super();
@@ -94,14 +97,14 @@ public class TaskPage extends CommonTaskPage {
         wait.until(attributeContains(xpath(fieldXpath), "value", fieldData));
     }
 
-    public void checkSubmitButtonState(boolean isEnabled) {
-        wait.until(presenceOfElementLocated(xpath(submitButtonPath)));
+    public void checkSubmitButtonState(String buttonName, boolean isEnabled) {
+        wait.until(presenceOfElementLocated(xpath(format(buttonXpath, buttonName))));
         if (isEnabled) {
-            wait.until(elementToBeClickable(xpath(submitButtonPath)));
+            wait.until(elementToBeClickable(xpath(format(buttonXpath, buttonName))));
         } else {
-            wait.until(not(elementToBeClickable(xpath(submitButtonPath))));
+            wait.until(not(elementToBeClickable(xpath(format(buttonXpath, buttonName)))));
         }
-        log.info("Кнопка далі активна = " + driver.findElement(xpath(submitButtonPath)).isEnabled());
+        log.info("Кнопка далі активна = " + driver.findElement(xpath(format(buttonXpath, buttonName))).isEnabled());
     }
 
     public void selectDataFromDateTime(String fieldName, String fieldData) {
@@ -162,15 +165,12 @@ public class TaskPage extends CommonTaskPage {
 
     public void checkTextareaText(String fieldName, String fieldData) {
         By textarea = xpath(format(textAreaPath, fieldName));
-        wait.until(presenceOfElementLocated(textarea));
-        String[] textItems = driver.findElement(textarea)
-                .getText()
-                .split("\n");
-        wait.until((ExpectedCondition<Boolean>) driver ->
-                Arrays.stream(textItems)
-                        .map(String::trim)
-                        .collect(Collectors.joining("\n"))
-                        .equalsIgnoreCase(fieldData.trim()));
+        checkTextInsideBlock(textarea, fieldData);
+    }
+
+    public void checkContentText(String fieldData) {
+        By content = xpath(contentTextPath);
+        checkTextInsideBlock(content, fieldData);
     }
 
     public void setFieldsData(FieldData fieldData) {
@@ -217,17 +217,39 @@ public class TaskPage extends CommonTaskPage {
                 .click();
     }
 
-    public void clickAddButton(String gridName) {
+    public void clickAddRawEditGridButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(format(addButtonPath, gridName))))
+                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName))))
                 .click();
     }
 
-    public TaskPage clickSaveButton() {
+    public TaskPage clickSaveRawEditGridButton() {
         wait
-                .until(elementToBeClickable(saveButton))
+                .until(elementToBeClickable(saveRawEditGridButton))
                 .click();
         return this;
     }
 
+    private void checkTextInsideBlock(By textarea, String fieldData) {
+        wait.until(presenceOfElementLocated(textarea));
+        String actualText = getTrimTextWithoutEmptyLines(driver.findElement(textarea).getText());
+        String expectedText = getTrimTextWithoutEmptyLines(fieldData);
+        wait.until(
+                new ExpectedCondition<Boolean>() {
+                    public Boolean apply(WebDriver driver) {
+                        return actualText.equalsIgnoreCase(expectedText);
+                    }
+
+                    public String toString() {
+                        return String.format("Expected text ('%s') but was ('%s')", actualText, expectedText);
+                    }
+                });
+    }
+
+    private String getTrimTextWithoutEmptyLines(String inputText) {
+        var text = inputText.replaceAll("(?m)^[ \t]*\r?\n", "").trim();
+        return Arrays.stream(text.split("\n"))
+                .map(String::trim)
+                .collect(Collectors.joining("\n"));
+    }
 }

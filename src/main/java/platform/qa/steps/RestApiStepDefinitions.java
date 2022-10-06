@@ -18,18 +18,20 @@ package platform.qa.steps;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.in;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
+import static platform.qa.base.convertors.RestApiConvertor.convertToListMap;
 import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getQueryParamsWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getRequestPathWithIds;
 import static platform.qa.base.convertors.RestApiConvertor.getResultKeyConvertedToCamelCase;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
+import static platform.qa.base.utils.RequestUtils.hasCurlyBracketsInQueryParameters;
 import static platform.qa.enums.Context.API_RESULTS;
 
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Тоді;
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import io.restassured.config.LogConfig;
 import io.restassured.filter.log.ErrorLoggingFilter;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -51,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -61,7 +64,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Log4j2
 public class RestApiStepDefinitions {
-    private RegistryConfig registryConfig = MasterConfig.getInstance().getRegistryConfig();
+    private MasterConfig masterConfig = MasterConfig.getInstance();
+    private RegistryConfig registryConfig = masterConfig.getRegistryConfig();
     private TestContext testContext;
 
     public RestApiStepDefinitions(TestContext testContext) {
@@ -80,7 +84,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
-        if (parametersWithIds.containsValue(null)) return;
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
 
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, parametersWithIds)
@@ -94,17 +98,75 @@ public class RestApiStepDefinitions {
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
 
+    @Коли("користувач {string} виконує запит пошуку {string} в реєстрі {string} з параметрами")
+    public void executeGetExternalRegistryApiWithParameters(@NonNull String userName,
+                                                            @NonNull String path,
+                                                            @NonNull String registryName,
+                                                            @NonNull Map<String, String> queryParams) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var parametersWithIds = getQueryParamsWithIds(queryParams, context);
+
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
+
+        masterConfig.setNamespaces(singletonList(registryName));
+        var externalRegConfig = masterConfig.getRegistryConfig(registryName);
+
+        var result = new RestApiClient(externalRegConfig.getDataFactory(userName))
+                .sendGetWithParams(path, parametersWithIds)
+                .extract()
+                .response()
+                .jsonPath()
+                .getList("", Map.class);
+        var request = new Request(path, queryParams, result, new Timestamp(currentTimeMillis()));
+        context.add(request);
+
+        testContext.getScenarioContext().setContext(API_RESULTS, context);
+    }
+
     @Коли("користувач {string} виконує запит пошуку {string} без параметрів")
-    public void executeGetApiWithoutParameters(String userName,
-                                               String path) {
+    public void executeGetApiWithoutParameters(@NonNull String userName,
+                                               @NonNull String path) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var pathWithIds = getRequestPathWithIds(path, context);
-        var result = new RestApiClient(registryConfig.getDataFactory(userName))
+
+        if (pathWithIds.contains("{")) return;
+
+        var responseObj = new RestApiClient(registryConfig.getDataFactory(userName))
                 .get(pathWithIds)
                 .then()
                 .extract()
                 .response()
-                .as(new TypeRef<List<Map>>() {});
+                .jsonPath()
+                .get("");
+        var result = convertToListMap(responseObj);
+
+        var pathContext = pathWithIds.contains("/") ? pathWithIds.substring(0, path.lastIndexOf("/")) : pathWithIds;
+        var request = new Request(pathContext, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
+        context.add(request);
+
+        testContext.getScenarioContext().setContext(API_RESULTS, context);
+    }
+
+    @Коли("користувач {string} виконує запит пошуку {string} в реєстрі {string} без параметрів")
+    public void executeGetExternalRegistryApiWithoutParameters(@NonNull String userName,
+                                                               @NonNull String path,
+                                                               @NonNull String registryName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var pathWithIds = getRequestPathWithIds(path, context);
+
+        if (pathWithIds.contains("{")) return;
+
+        masterConfig.setNamespaces(singletonList(registryName));
+        var externalRegConfig = masterConfig.getRegistryConfig(registryName);
+
+        var responseObj = new RestApiClient(externalRegConfig.getDataFactory(userName))
+                .get(pathWithIds)
+                .then()
+                .extract()
+                .response()
+                .jsonPath()
+                .get("");
+        var result = convertToListMap(responseObj);
 
         var pathContext = pathWithIds.contains("/") ? pathWithIds.substring(0, path.lastIndexOf("/")) : pathWithIds;
         var request = new Request(pathContext, Collections.emptyMap(), result, new Timestamp(currentTimeMillis()));
@@ -116,7 +178,8 @@ public class RestApiStepDefinitions {
     @Коли("виконується фільтрація результатів запиту {string} за параметрами")
     public void filterApiResultsByParams(@NonNull String path, @NonNull Map<String, String> params) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        var filteredContext = getLastRequest(context, path).getResultsContainsMap(params);
+        var parametersWithIds = getQueryParamsWithIds(params, context);
+        var filteredContext = getLastRequest(context, path).getResultsContainsMap(parametersWithIds);
         getLastRequest(context, path).setResults(filteredContext);
 
         log.info("Відфільтровані результати наступні: \n" + StringUtils.join(filteredContext, "\n"));
@@ -131,7 +194,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
-        if (paramsWithIds.containsValue(null)) return;
+        if (hasCurlyBracketsInQueryParameters(paramsWithIds)) return;
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
@@ -139,12 +202,15 @@ public class RestApiStepDefinitions {
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
-        var result = new RestApiClient(registryConfig.getDataFactory(userName), signature)
+        var response = new RestApiClient(registryConfig.getDataFactory(userName), signature)
                 .post(payload, path)
                 .then()
-                .statusCode(201)
+                .statusCode(in(List.of(201, 409)))
                 .extract()
-                .response()
+                .response();
+        if (response.statusCode() == 409) return;
+
+        var result = response
                 .jsonPath()
                 .getMap("");
 
@@ -176,18 +242,6 @@ public class RestApiStepDefinitions {
                 .put(id, payload, path);
     }
 
-    @Коли("користувач {string} виконує запит видалення {string} з ідентифікатором {string}")
-    public void executeDeleteApiWithId(String userName,
-                                       @NonNull String path,
-                                       @NonNull String id) {
-        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signDeleteRequest(id);
-
-        new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .delete(id, path + "/");
-    }
-
     @Тоді("користувач {string} виконує запит {string} видалення даних створених в сценарії з назвою параметру {string}")
     public void executeDeleteApiByColumnName(String userName,
                                              @NonNull String path,
@@ -197,14 +251,18 @@ public class RestApiStepDefinitions {
         var filteredRequests = context.stream()
                 .filter(request -> request.isResultContainsKeyWithNonNullValue(idColumnName))
                 .collect(Collectors.toList());
-
+        AtomicReference<String> deletedId = new AtomicReference<>();
         filteredRequests.stream()
                 .map(request -> request.getResultValueByKey(idColumnName))
-                .forEach(id -> executeDeleteApiWithId(userName, path, id));
+                .distinct()
+                .forEach(id -> {
+                    executeDeleteApiWithId(userName, path, id);
+                    deletedId.set(id);
+                });
 
         context.stream()
                 .filter(request -> request.isResultContainsKeyWithNonNullValue(idColumnName))
-                .forEach(request -> request.setResultValueByKey(idColumnName, null));
+                .forEach(request -> request.setResultNewValueByKeyValue(idColumnName, deletedId.get(), null));
 
         testContext.getScenarioContext().setContext(API_RESULTS, context);
     }
@@ -212,6 +270,17 @@ public class RestApiStepDefinitions {
     @Тоді("користувач очищує контекст від збережених результатів попередніх запитів")
     public void clearContext() {
         testContext.getScenarioContext().setContext(API_RESULTS, new ArrayList<Request>());
+    }
+
+    private void executeDeleteApiWithId(String userName,
+                                        @NonNull String path,
+                                        @NonNull String id) {
+        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
+                registryConfig.getDigitalSignatureOps(userName),
+                registryConfig.getSignatureCeph()).signDeleteRequest(id);
+
+        new RestApiClient(registryConfig.getDataFactory(userName), signature)
+                .delete(id, path + "/");
     }
 
     private List<Integer> getSuccessStatuses() {

@@ -17,17 +17,19 @@
 package platform.qa.officer.pages;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.urlToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+
+import lombok.extern.log4j.Log4j2;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
+@Log4j2
 public class LoginPage extends OfficerBasePage {
 
     @FindBy(xpath = "//button[@data-xpath='loginButton']")
     WebElement authButton;
-    String loginUrl = baseUrl + "login";
 
     public AuthWithCesPage openAuthWithCesPage() {
         return openPage()
@@ -36,11 +38,9 @@ public class LoginPage extends OfficerBasePage {
     }
 
     public LoginPage openPage() {
-        openPage(loginUrl);
+        openPage(baseUrl);
         wait
-                .withMessage("Поточний URL не збігається з очікуваним")
-                .until(ExpectedConditions.urlToBe(loginUrl));
-        wait = getDefaultWebDriverWait();
+                .until(urlToBe(getExpectedLoginUrl()));
         return this;
     }
 
@@ -54,5 +54,13 @@ public class LoginPage extends OfficerBasePage {
     public LoginPage checkThatAuthorizationButtonIsActive() {
         wait.until(elementToBeClickable(authButton));
         return this;
+    }
+
+    private String getExpectedLoginUrl() {
+        if (baseUrl.endsWith("officer")) return baseUrl + "/login";
+        if (baseUrl.endsWith("officer/")) return baseUrl + "login";
+        if (baseUrl.endsWith("/")) return baseUrl + "officer/login";
+        if (!baseUrl.endsWith("/")) return baseUrl + "/officer/login";
+        return baseUrl;
     }
 }

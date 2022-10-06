@@ -19,9 +19,14 @@ package platform.qa.base.providers;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import platform.qa.configuration.RunUITestConfiguration;
 
+import java.io.File;
+import java.util.HashMap;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -34,6 +39,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 public class WebDriverProvider {
     protected static RunUITestConfiguration runUITestConfig = RunUITestConfiguration.getInstance();
     private static WebDriver instance;
+    public static String chromeDownloadPath = FileUtils.getUserDirectoryPath() + File.separator +"load-chrome";
 
     public static WebDriver getInstance() {
         if (instance == null) {
@@ -46,18 +52,23 @@ public class WebDriverProvider {
         WebDriverManager.chromedriver().setup();
         WebDriver driver;
         driver = getDriver();
-        driver.manage().window().maximize();
+        driver.manage().window().setSize(new Dimension(1920, 1080));
         return driver;
     }
 
+    @SneakyThrows
     private static WebDriver getDriver() {
+        HashMap<String, Object> chromePrefs = new HashMap<>();
+        FileUtils.forceMkdir(new File(chromeDownloadPath));
+        chromePrefs.put("profile.default_content_settings.popups", 0);
+        chromePrefs.put("download.default_directory", chromeDownloadPath);
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("prefs", chromePrefs);
+
         if (runUITestConfig.isRemoteRunEnabled()) {
-            ChromeOptions options = new ChromeOptions();
             options.setHeadless(true);
-            return new ChromeDriver(options);
-        } else {
-            return new ChromeDriver();
         }
+        return new ChromeDriver(options);
     }
 
     public static boolean isWebDriverOpened() {

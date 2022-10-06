@@ -16,10 +16,13 @@
 
 package platform.qa.base.convertors;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static platform.qa.files.SearchText.searchTextByRegExp;
 
 import platform.qa.entities.context.Request;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.CaseFormat;
 
 public class RestApiConvertor {
@@ -44,13 +46,14 @@ public class RestApiConvertor {
         if (CollectionUtils.isEmpty(context)) return paramsWithIds;
 
         queryParams.entrySet().stream()
-                .filter(param -> param.getValue() == null)
+                .filter(param -> isNotEmpty(substringBetween(param.getValue(), "{", "}")))
                 .forEach(param -> {
+                    var key = substringBetween(param.getValue(), "{", "}");
                     var lastRequest = context.stream()
-                            .filter(request -> request.isResultContainsKey(param.getKey()))
+                            .filter(request -> request.isResultContainsKey(key))
                             .max(Request::compareTo);
                     lastRequest.ifPresent(request -> paramsWithIds.replace(param.getKey(),
-                            String.valueOf(request.getResultValueByKey(param.getKey()))));
+                            String.valueOf(request.getResultValueByKey(key))));
                 });
         return paramsWithIds;
     }
@@ -66,9 +69,9 @@ public class RestApiConvertor {
 
         //For array inside parameters
         queryParams.entrySet().stream()
-                .filter(param -> param.getValue() != null && param.getValue().startsWith("["))
+                .filter(param -> isNotEmpty(substringBetween(param.getValue(), "[", "]")))
                 .forEach(param -> {
-                    var value = StringUtils.substringBetween(param.getValue(), "[", "]");
+                    var value = substringBetween(param.getValue(), "[", "]");
                     var requests = context.stream()
                             .filter(request -> request.isResultContainsKey(value))
                             .collect(Collectors.toList());
@@ -96,6 +99,11 @@ public class RestApiConvertor {
         return result;
     }
 
+    /**
+     * @param path    input request path which can contain id keys without value
+     * @param context scenario context where id values stored from previous requests execution
+     * @return converted request path where id keys filled with values from context
+     */
     public static String getRequestPathWithIds(String path, List<Request> context) {
         if (path.matches(".*\\{\\w+}.*")) {
             AtomicReference<String> newPath = new AtomicReference<>(path);
@@ -108,6 +116,23 @@ public class RestApiConvertor {
             return newPath.get();
         }
         return path;
+    }
+
+    /**
+     * @param responseObject request response object
+     * @return converted response object to List<Map>
+     */
+    public static List<Map> convertToListMap(Object responseObject) {
+        List<Map> convertedResponse = new ArrayList<>();
+        if (responseObject instanceof Map) {
+            convertedResponse.add((Map) responseObject);
+        }
+        if (responseObject instanceof List<?>) {
+            convertedResponse = ((List<?>) responseObject).stream()
+                    .map(item -> (Map) item)
+                    .collect(Collectors.toList());
+        }
+        return convertedResponse;
     }
 }
 

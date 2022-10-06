@@ -20,17 +20,23 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
-import static platform.qa.base.utils.FileUtils.getFileNameFromPath;
-import static platform.qa.base.utils.FileUtils.getFilePath;
+import static platform.qa.base.utils.CustomFileUtils.getFileNameFromPath;
+import static platform.qa.base.utils.CustomFileUtils.getFilePath;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
 import static platform.qa.enums.Context.API_RESULTS;
 
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Тоді;
-import platform.qa.base.utils.FileUtils;
+import platform.qa.base.utils.CustomFileUtils;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.assertj.core.api.Assertions;
 
 /**
  * Cucumber step definitions for data factory search conditions
@@ -65,7 +71,7 @@ public class DataModelStepDefinitions {
 
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getFileNameFromPath(jsonFilePath);
-        String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
@@ -84,7 +90,7 @@ public class DataModelStepDefinitions {
 
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getFileNameFromPath(jsonFilePath);
-        String expectedJsonText = FileUtils.readFromFile(filePath, jsonFileName);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
@@ -103,5 +109,33 @@ public class DataModelStepDefinitions {
                 .inPath("$.." + fieldName)
                 .isArray()
                 .contains(fieldValue);
+    }
+
+    @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, відсортований по полю "
+            + "{string} ігноруючі невказані")
+    public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath,
+                                                                      String sortingFieldName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        List<String> actualSortingFieldValues = new ArrayList<>();
+        for (Map map :
+                actualResult) {
+            actualSortingFieldValues.add(map.get(sortingFieldName).toString());
+        }
+
+        List<String> sortedActualSortingFieldValues =
+                actualSortingFieldValues.stream()
+                        .sorted()
+                        .collect(Collectors.toList());
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+                .isEqualTo(actualSortingFieldValues);
+
+        String filePath = getFilePath(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
 }

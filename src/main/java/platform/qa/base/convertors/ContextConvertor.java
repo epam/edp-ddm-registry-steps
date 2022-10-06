@@ -20,7 +20,9 @@ import platform.qa.entities.context.Request;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ContextConvertor {
@@ -32,9 +34,7 @@ public class ContextConvertor {
     public static List<Request> convertToRequestsContext(Object context) {
         List<Request> convertedContext = new ArrayList<>();
         if (context instanceof Request) {
-            convertedContext = new ArrayList<>() {{
-                add((Request) context);
-            }};
+            convertedContext.add((Request) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
@@ -51,9 +51,7 @@ public class ContextConvertor {
     public static List<File> convertToFileList(Object context) {
         List<File> convertedContext = new ArrayList<>();
         if (context instanceof File) {
-            convertedContext = new ArrayList<>() {{
-                add((File) context);
-            }};
+            convertedContext.add((File) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
@@ -64,20 +62,40 @@ public class ContextConvertor {
     }
 
     /**
+     * @param context  - Scenario context to convert
+     * @return - converted context to File
+     */
+    public static File convertToFile(Object context) {
+        if (context instanceof File) {
+            return (File) context;
+        }
+        return null;
+    }
+
+    /**
      * @param context - Scenario context to convert
      * @return - converted context to List<String>
      */
     public static List<String> convertToStringList(Object context) {
         List<String> convertedContext = new ArrayList<>();
         if (context instanceof String) {
-            convertedContext = new ArrayList<>() {{
-                add((String) context);
-            }};
+            convertedContext.add((String) context);
         }
         if (context instanceof List<?>) {
             convertedContext = ((List<?>) context).stream()
                     .map(item -> (String) item)
                     .collect(Collectors.toList());
+        }
+        return convertedContext;
+    }
+
+    public static HashMap<String, String> convertToRandomMapContext(Object context) {
+        var convertedContext = new HashMap<String, String>();
+        if (context instanceof HashMap) {
+            var collectedMap = ((Map<?, ?>)context).entrySet().stream()
+                    .collect(Collectors.toMap(entry->String.valueOf(entry.getKey()),entry->String.valueOf(entry.getValue())));
+            convertedContext.putAll(collectedMap);
+            return convertedContext;
         }
         return convertedContext;
     }

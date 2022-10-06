@@ -16,17 +16,31 @@
 
 package platform.qa.officer.pages.components;
 
+import static platform.qa.date.DateConverter.convertDateTimeByPattern;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.openqa.selenium.WebElement;
 
 @AllArgsConstructor
 @Getter
 @Setter
-public class Row {
-    private String processDefinitionName;
-    private String businessKey;
-    private String taskDefinitionName;
-    private String startTime;
-    private String endTime;
+@Builder
+public class Row implements Comparable<Row> {
+    private WebElement processDefinitionName;
+    private WebElement businessKey;
+    private WebElement taskDefinitionName;
+    private WebElement startTime;
+    private WebElement endTime;
+    private WebElement result;
+    private WebElement actionButton;
+
+    @Override
+    public int compareTo(Row otherRow) {
+        return convertDateTimeByPattern(getStartTime().getText(), "dd.MM.yyyy HH:mm")
+                .compareTo(convertDateTimeByPattern(otherRow.getStartTime().getText(), "dd.MM.yyyy HH:mm"));
+    }
 }

@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 
-package platform.qa.steps;
+package platform.qa.steps.cabinet;
 
+import static org.apache.commons.lang3.StringUtils.substringBetween;
+import static platform.qa.base.convertors.ContextConvertor.convertToRandomMapContext;
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
+import static platform.qa.enums.Context.RANDOM_VALUE_MAP;
 
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.uk.І;
-import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Та;
-import io.cucumber.java.uk.Тоді;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
 import platform.qa.enums.FieldType;
-import platform.qa.officer.pages.AvailableServicesPage;
-import platform.qa.officer.pages.DashboardPage;
-import platform.qa.officer.pages.MyTasksPage;
+import platform.qa.enums.ValueType;
 import platform.qa.officer.pages.SignTaskPage;
 import platform.qa.officer.pages.TaskPage;
-import platform.qa.officer.steps.LoginSteps;
 import platform.qa.providers.impl.RegistryUserProvider;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import org.apache.commons.lang.RandomStringUtils;
 
 /**
- * Cucumber step definitions for officer portal
+ * Cucumber step definitions for cabinet portal different task (forms)
  */
-public class OfficerCabinetStepDefinitions {
-
+public class TaskStepDefinitions {
     private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
-    public OfficerCabinetStepDefinitions(TestContext testContext) {
+    public TaskStepDefinitions(TestContext testContext) {
         this.testContext = testContext;
     }
 
@@ -81,36 +80,20 @@ public class OfficerCabinetStepDefinitions {
         return value.equals("активна");
     }
 
-    @Дано("користувач {string} успішно увійшов у кабінет посадової особи")
-    public void verifyOfficerOpenDashboardPage(String userName) {
-        new LoginSteps()
-                .loginOfficerPortal(users.get(userName));
-        testContext.getScenarioContext().setContext(OFFICER_USER_LOGIN, users.get(userName).getLogin());
-    }
-
-    @Дано("бачить доступний процес {string}")
-    public void verifyProcessAvailable(String processName) {
-        new DashboardPage()
-                .clickOnAvailableServices()
-                .checkProcessByName(processName);
-    }
-
-    @Коли("користувач ініціює процес {string}")
-    public void verifyUserStartProcess(String processName) {
-        new AvailableServicesPage()
-                .clickOnProcessByName(processName);
-    }
-
-    @Коли("бачить форму {string} із кнопкою \"Далі\" яка {booleanValue}")
-    public void verifyDisplayFormName(String formName, boolean isEnabled) {
+    @Коли("бачить форму {string} із кнопкою {string} яка {booleanValue}")
+    public void verifyDisplayFormName(String formName, String buttonName, boolean isEnabled) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
-                .checkSubmitButtonState(isEnabled);
+                .checkSubmitButtonState(buttonName, isEnabled);
     }
 
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
+        var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
         for (FieldData fieldData : rows) {
+            if (fieldData.getValue().startsWith("{")) {
+                fieldData.setValue(randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
+            }
             new TaskPage()
                     .setFieldsData(fieldData);
         }
@@ -124,20 +107,27 @@ public class OfficerCabinetStepDefinitions {
         }
     }
 
-    @Коли("бачить форму {string}")
-    public void verifyDisplayFormNameWithoutSubmitButton (String formName) {
+    @Коли("бачить форму/сторінку {string}")
+    public void verifyDisplayFormNameWithoutSubmitButton(String formName) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName);
     }
 
-    @Та("натискає кнопку \"Далі\"")
-    public void clickButton() {
+    @Та("натискає кнопку {string}")
+    public void clickButton(String buttonName) {
         new TaskPage()
-                .submitForm();
+                .clickButton(buttonName);
+    }
+
+    @Та("на формі {string} бачить наступний текст:")
+    public void checkFormContent(String formName, String messageText) {
+        new TaskPage()
+                .checkTaskName(TaskPage.class, formName)
+                .checkContentText(messageText);
     }
 
     @Та("на формі {string} бачить повідомлення {string} з текстом:")
-    public void checkMessage(String formName, String messageLabel, String messageText){
+    public void checkMessage(String formName, String messageLabel, String messageText) {
         new TaskPage()
                 .checkTaskName(TaskPage.class, formName)
                 .checkTextareaText(messageLabel, messageText);
@@ -156,30 +146,50 @@ public class OfficerCabinetStepDefinitions {
                 .signTask(users.get((String) testContext.getScenarioContext().getContext(OFFICER_USER_LOGIN)));
     }
 
-    @Тоді("процес закінчено успішно й задача {string} відображається як виконана у переліку задач")
-    public void verifyTaskCompleted(String taskName) {
-        new MyTasksPage().checkNotificationMessage(taskName)
-                .clickOnProvisionedTasksTab()
-                .checkTaskExistsByTaskName(taskName);
-    }
-
-    @Тоді("послуга {string} має ідентифікатор {string}")
-    public void verifyServiceIdentifier(String processDefinitionName, String businessKey) {
-        new MyTasksPage()
-                .clickOnProvisionedTasksTab()
-                .checkTaskExistsByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
-    }
-
     @І("додає запис до {string} таблиці із даними")
     public void userFillGridFieldsWithData(String gridName, List<FieldData> rows) {
         TaskPage taskPage = new TaskPage();
         taskPage
-                .clickAddButton(gridName);
+                .clickAddRawEditGridButton(gridName);
         for (FieldData fieldData : rows) {
             taskPage
                     .setFieldsData(fieldData);
         }
         taskPage
-                .clickSaveButton();
+                .clickSaveRawEditGridButton();
+    }
+
+    @ParameterType(value = "цифр|літер")
+    public ValueType randomValueType(String value) {
+        return getValueType(value);
+    }
+
+    private ValueType getValueType(String entry) {
+        try {
+            return Arrays.stream(ValueType.values())
+                    .filter(value -> value.getValueType().equals(entry))
+                    .findFirst()
+                    .orElseThrow();
+        } catch (NoSuchElementException ex) {
+            return ValueType.valueOf(entry);
+        }
+    }
+
+    @І("користувач генерує випадкові дані з {randomValueType} у кількості {int} та записує у змінну {string}")
+    public void createRandomValue(ValueType valueType, int amount, String randomValueKey) {
+        var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
+        String randomValueData;
+        switch (valueType) {
+            case DIGIT:
+                randomValueData = RandomStringUtils.randomNumeric(amount);
+                break;
+            case LETTER:
+                randomValueData = RandomStringUtils.randomAlphabetic(amount);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + valueType);
+        }
+        randomValueMap.put(randomValueKey, randomValueData);
+        testContext.getScenarioContext().setContext(RANDOM_VALUE_MAP, randomValueMap);
     }
 }

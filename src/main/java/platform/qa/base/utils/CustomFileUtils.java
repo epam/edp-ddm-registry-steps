@@ -16,21 +16,36 @@
 
 package platform.qa.base.utils;
 
+import static com.google.common.base.CharMatcher.invisible;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 import java.util.stream.IntStream;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 
 @Log4j2
-public class FileUtils {
+public class CustomFileUtils {
 
     public static final String TEST_RESOURCES_FOLDER = "src/test/resources/";
 
@@ -55,7 +70,7 @@ public class FileUtils {
         return IntStream.range(0, nameCount)
                 .mapToObj(i -> readFileToObject(resourcePath, Path.of(resourcePath).getName(i).toString(), clazzValue
                         , mapper))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -81,5 +96,50 @@ public class FileUtils {
             endPath = endPathTmp.startsWith("/") ? endPathTmp.substring(1) : endPathTmp;
         }
         return TEST_RESOURCES_FOLDER + endPath;
+    }
+
+    /**
+     * @param file - file to get modified datetime
+     * @return FileTime where file was modified
+     */
+    @SneakyThrows
+    public static FileTime getFileModifiedTime(File file) {
+        return Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS);
+    }
+
+    /**
+     * @param file - csv file to parse
+     * @return - List<Map<String, String>> which contains file data with headers
+     */
+    public static List<Map<String, String>> parseCsvFile(File file) {
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(',')
+                .withIgnoreQuotations(false)
+                .withIgnoreLeadingWhiteSpace(true)
+                .withQuoteChar('"')
+                .build();
+        List<Map<String, String>> results = new LinkedList<>();
+
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
+            CSVReader csvReader = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .build();
+            List<String[]> allRecords = csvReader.readAll();
+
+            if (CollectionUtils.isNotEmpty(allRecords)) {
+                String[] headers = allRecords.get(0);
+                results = allRecords
+                        .subList(1, allRecords.size()).stream()
+                        .map(line -> IntStream.range(0, line.length)
+                                .boxed()
+                                .collect(toMap(i -> invisible().trimFrom(headers[i]),
+                                        i -> invisible().trimFrom(line[i]))))
+                        .collect(toList());
+            }
+
+        } catch (IOException | CsvException e) {
+            log.info("CSV file: " + file.getAbsolutePath() + " was not parsed!!!");
+        }
+        return results;
     }
 }

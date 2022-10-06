@@ -22,6 +22,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import lombok.Getter;
 import platform.qa.officer.panel.OfficerHeaderPanel;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -42,7 +44,8 @@ public class AvailableServicesPage extends OfficerBasePage {
     }
 
     WebElement getProcessPath(String text) {
-        return driver.findElement(By.xpath(String.format("//button[text()=\"%s\"]", text)));
+        String path = getTextPathWithDifferentQuotes(text);
+        return driver.findElement(By.xpath(String.format("//button[text()=%s]", path)));
     }
 
     public AvailableServicesPage checkAvailableServicesHeader() {
@@ -58,5 +61,17 @@ public class AvailableServicesPage extends OfficerBasePage {
     public AvailableServicesPage checkProcessByName(String processName) {
         wait.until(visibilityOf(getProcessPath(processName)));
         return this;
+    }
+
+    private String getTextPathWithDifferentQuotes(String text) {
+        String path = String.format("\"%s\"", text);
+        if (text.contains("\"")) {
+            text =
+                    Arrays.stream(text.split("\""))
+                            .map(item -> String.format("\"%s\"", item) + ",'\"'")
+                            .collect(Collectors.joining(","));
+            path = String.format("concat(%s)", text);
+        }
+        return path;
     }
 }
