@@ -126,9 +126,11 @@ public class DataModelStepDefinitions {
             actualSortingFieldValues.add(map.get(sortingFieldName).toString());
         }
 
-        actualSortingFieldValues.sort((o1, o2) -> Collator.getInstance(new Locale("uk", "UA")).compare(o1.toLowerCase(), o2.toLowerCase()));
+        List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
 
-        Assertions.assertThat(actualSortingFieldValues).as("Дані невірно відсортовані")
+        sortedActualSortingFieldValues.sort((o1, o2) -> Collator.getInstance(new Locale("uk", "UA")).compare(o1.toLowerCase(), o2.toLowerCase()));
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
 
         String filePath = getFilePath(jsonFilePath);
