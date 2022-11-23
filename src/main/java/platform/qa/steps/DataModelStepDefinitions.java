@@ -39,6 +39,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sf.json.test.JSONAssert;
 
 /**
  * Cucumber step definitions for data factory search conditions
@@ -116,7 +120,7 @@ public class DataModelStepDefinitions {
     @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, відсортований по полю "
             + "{string} ігноруючі невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath,
-                                                                      String sortingFieldName) {
+                                                                      String sortingFieldName) throws JsonProcessingException {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
 
@@ -125,17 +129,20 @@ public class DataModelStepDefinitions {
             actualSortingFieldValues.add(map.get(sortingFieldName).toString());
         }
 
-        List<String> sortedActualSortingFieldValues = actualSortingFieldValues;
+        actualSortingFieldValues.sort((o1, o2) -> Collator.getInstance(new Locale("uk", "UA")).compare(o1.toLowerCase(), o2.toLowerCase()));
 
-        sortedActualSortingFieldValues.sort((o1, o2) -> Collator.getInstance(new Locale("uk", "UA")).compare(o1.toLowerCase(), o2.toLowerCase()));
-
-        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+        Assertions.assertThat(actualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
 
         String filePath = getFilePath(jsonFilePath);
         String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
-        assertThatJson(actualResult).as("Дані не співпадають:")
-                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, String>> expectedJsonMap = objectMapper.readValue(expectedJsonText,
+                new TypeReference<>() {});
+
+        assertThatJson(actualResult.stream().sorted()).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonMap.stream().sorted());
     }
 }
