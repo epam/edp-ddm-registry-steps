@@ -17,6 +17,7 @@
 package platform.qa.steps;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
@@ -37,12 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.json.test.JSONAssert;
 
 /**
  * Cucumber step definitions for data factory search conditions
@@ -138,11 +135,7 @@ public class DataModelStepDefinitions {
         String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, String>> expectedJsonMap = objectMapper.readValue(expectedJsonText,
-                new TypeReference<>() {});
-
-        assertThatJson(actualResult.stream().sorted()).as("Дані не співпадають:")
-                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonMap.stream().sorted());
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 }
