@@ -130,10 +130,21 @@ public class DataModelStepDefinitions {
 
         List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
 
-        sortedActualSortingFieldValues.sort((o1, o2) ->
-                Collator.getInstance(new Locale("uk", "UA"))
-                        .compare(Pattern.compile("\\W+").matcher(o1.toLowerCase()).replaceFirst(""),
-                                Pattern.compile("\\W+").matcher(o2.toLowerCase()).replaceFirst("")));
+        sortedActualSortingFieldValues.sort((o1, o2) -> {
+            Collator instance = Collator.getInstance(new Locale("uk", "UA"));
+            String specialCharactersRegex = "[^\\w\\x{0400}-\\x{04FF}]";
+            Matcher matcher1 = Pattern.compile(specialCharactersRegex + "+").matcher(o1);
+            Matcher matcher2 = Pattern.compile(specialCharactersRegex + "+").matcher(o2);
+            o1 = o1.toLowerCase();
+            o2 = o2.toLowerCase();
+            if (String.valueOf(o1.charAt(0)).matches(specialCharactersRegex)) {
+                o1 = o1.replace(o1.substring(0, o1.indexOf(matcher1.group())), "");
+            }
+            if (String.valueOf(o2.charAt(0)).matches(specialCharactersRegex)) {
+                o2 = o2.replace(o2.substring(0, o2.indexOf(matcher2.group())), "");
+            }
+            return instance.compare(o1, o2);
+        });
 
         Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
