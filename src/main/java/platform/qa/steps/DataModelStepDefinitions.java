@@ -131,19 +131,9 @@ public class DataModelStepDefinitions {
         List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
 
         sortedActualSortingFieldValues.sort((o1, o2) -> {
-            o1 = o1.toLowerCase();
-            o2 = o2.toLowerCase();
             Collator instance = Collator.getInstance(new Locale("uk", "UA"));
-            String specialCharactersRegex = "[^\\w\\x{0400}-\\x{04FF}]";
-            Matcher matcher1 = Pattern.compile(specialCharactersRegex + "+").matcher(o1);
-            Matcher matcher2 = Pattern.compile(specialCharactersRegex + "+").matcher(o2);
-
-            if (String.valueOf(o1.charAt(0)).matches(specialCharactersRegex))
-                o1 = matcher1.replaceFirst("");
-
-            if (String.valueOf(o2.charAt(0)).matches(specialCharactersRegex))
-                o2 = matcher2.replaceFirst("");
-
+            o1 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o1.toLowerCase()).replaceAll("");
+            o2 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o2.toLowerCase()).replaceAll("");
             return instance.compare(o1, o2);
         });
 
