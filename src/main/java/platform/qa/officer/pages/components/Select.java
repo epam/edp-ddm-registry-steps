@@ -106,7 +106,7 @@ public class Select extends BasePage {
                     public Boolean apply(WebDriver driver) {
                         try {
                             list = selectItems.stream().map(WebElement::getText).collect(Collectors.joining(","));
-                            return selectItems.stream().anyMatch(item -> item.getText().startsWith(itemValue));
+                            return selectItems.stream().anyMatch(item -> item.getText().trim().startsWith(itemValue));
                         } catch (StaleElementReferenceException var3) {
                             return false;
                         }

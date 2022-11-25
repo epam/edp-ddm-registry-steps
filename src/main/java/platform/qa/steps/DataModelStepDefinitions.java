@@ -17,6 +17,7 @@
 package platform.qa.steps;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
@@ -31,6 +32,14 @@ import platform.qa.base.utils.CustomFileUtils;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.configuration.RegistryConfig;
 import platform.qa.cucumber.TestContext;
+
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
+import org.assertj.core.api.Assertions;
 
 /**
  * Cucumber step definitions for data factory search conditions
@@ -103,5 +112,60 @@ public class DataModelStepDefinitions {
                 .inPath("$.." + fieldName)
                 .isArray()
                 .contains(fieldValue);
+    }
+
+    @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, відсортований по полю "
+            + "{string} ігноруючі невказані")
+    public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath,
+                                                                      String sortingFieldName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        List<String> actualSortingFieldValues = new ArrayList<>();
+        for (Map map : actualResult)
+            actualSortingFieldValues.add(map.get(sortingFieldName).toString());
+
+        List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
+        sortedActualSortingFieldValues.sort((o1, o2) -> {
+            o1 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o1.toLowerCase()).replaceAll("");
+            o2 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o2.toLowerCase()).replaceAll("");
+            return Collator.getInstance(new Locale("uk", "UA")).compare(o1, o2);
+        });
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+                .isEqualTo(actualSortingFieldValues);
+
+        String filePath = getFilePath(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
+
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
+    }
+
+    @Тоді("дата модель за запитом {string} повертає json з файлу {string}, відсортований по полю {string}")
+    public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath, String sortingFieldName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        List<String> actualSortingFieldValues = new ArrayList<>();
+        for (Map map : actualResult)
+            actualSortingFieldValues.add(map.get(sortingFieldName).toString());
+
+        List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
+        sortedActualSortingFieldValues.sort((o1, o2) -> {
+            o1 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o1.toLowerCase()).replaceAll("");
+            o2 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o2.toLowerCase()).replaceAll("");
+            return Collator.getInstance(new Locale("uk", "UA")).compare(o1, o2);
+        });
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+                .isEqualTo(actualSortingFieldValues);
+
+        String filePath = getFilePath(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
+
+        assertThatJson(actualResult).as("Дані не співпадають:").when(IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 }
