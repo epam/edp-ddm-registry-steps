@@ -83,7 +83,7 @@ public class DataModelStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
         assertThatJson(actualResult).as("Дані не співпадають:")
-                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 
     @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, ігноруючі невказані")
@@ -95,7 +95,7 @@ public class DataModelStepDefinitions {
         String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
         assertThatJson(actualResult).as("Дані не співпадають:")
-                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 
     @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
@@ -166,6 +166,7 @@ public class DataModelStepDefinitions {
         String jsonFileName = getFileNameFromPath(jsonFilePath);
         String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
 
-        assertThatJson(actualResult).as("Дані не співпадають:").when(IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 }
