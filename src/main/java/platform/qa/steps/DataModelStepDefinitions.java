@@ -67,6 +67,28 @@ public class DataModelStepDefinitions {
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
+    @Тоді("дата модель за запитом {string} повертає точно заданий json нижче, відсортований по полю {string}:")
+    public void verifyDataModelReturnJsonWithData(String path, String sortingFieldName, String expectedJsonText) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        List<String> actualSortingFieldValues = new ArrayList<>();
+        for (Map map : actualResult)
+            actualSortingFieldValues.add(map.get(sortingFieldName).toString());
+
+        List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
+        sortedActualSortingFieldValues.sort((o1, o2) -> {
+            o1 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o1.toLowerCase()).replaceAll("");
+            o2 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o2.toLowerCase()).replaceAll("");
+            return Collator.getInstance(new Locale("uk", "UA")).compare(o1, o2);
+        });
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+                .isEqualTo(actualSortingFieldValues);
+
+        assertThatJson(actualResult).as("Дані не співпадають:").when(IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
+    }
+
     @Тоді("дата модель за запитом {string} повертає json з файлу {string}")
     public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
@@ -78,15 +100,34 @@ public class DataModelStepDefinitions {
         assertThatJson(actualResult).as("Дані не співпадають:").isEqualTo(expectedJsonText);
     }
 
-    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючі невказані:")
-    public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
+    @Тоді("дата модель за запитом {string} повертає json з файлу {string}, відсортований по полю {string}")
+    public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath, String sortingFieldName) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
+
+        List<String> actualSortingFieldValues = new ArrayList<>();
+        for (Map map : actualResult)
+            actualSortingFieldValues.add(map.get(sortingFieldName).toString());
+
+        List<String> sortedActualSortingFieldValues = new ArrayList<>(actualSortingFieldValues);
+        sortedActualSortingFieldValues.sort((o1, o2) -> {
+            o1 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o1.toLowerCase()).replaceAll("");
+            o2 = Pattern.compile("[^\\w\\x{0400}-\\x{04FF}]+").matcher(o2.toLowerCase()).replaceAll("");
+            return Collator.getInstance(new Locale("uk", "UA")).compare(o1, o2);
+        });
+
+        Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
+                .isEqualTo(actualSortingFieldValues);
+
+        String filePath = getFilePath(jsonFilePath);
+        String jsonFileName = getFileNameFromPath(jsonFilePath);
+        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
+
         assertThatJson(actualResult).as("Дані не співпадають:")
-                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 
-    @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, ігноруючі невказані")
+    @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, ігноруючи невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
@@ -98,24 +139,8 @@ public class DataModelStepDefinitions {
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
 
-    @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
-    public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
-        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        var actualResult = getLastRequest(context, path).getResults();
-
-        assertThatJson(actualResult)
-                .as("Такого поля не існує в json-і:")
-                .inPath("$.." + fieldName)
-                .isPresent();
-        assertThatJson(actualResult)
-                .as("Дані в полі не співпадають:")
-                .inPath("$.." + fieldName)
-                .isArray()
-                .contains(fieldValue);
-    }
-
     @Тоді("дата модель за запитом {string} повертає точно заданий json з файлу {string}, відсортований по полю "
-            + "{string} ігноруючі невказані")
+            + "{string} ігноруючи невказані")
     public void verifyDataModelReturnJsonFromFileWithDataFromExpected(String path, String jsonFilePath,
                                                                       String sortingFieldName) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
@@ -143,8 +168,19 @@ public class DataModelStepDefinitions {
                 .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
 
-    @Тоді("дата модель за запитом {string} повертає json з файлу {string}, відсортований по полю {string}")
-    public void verifyDataModelReturnJsonFromFileWithData(String path, String jsonFilePath, String sortingFieldName) {
+    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючи невказані:")
+    public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
+    }
+
+    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, відсортовані по полю "
+            + "{string} ігноруючи невказані:")
+    public void verifyDataModelReturnJsonWithDataFromExpected(String path, String sortingFieldName,
+                                                              String expectedJsonText) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
 
@@ -162,10 +198,23 @@ public class DataModelStepDefinitions {
         Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
 
-        String filePath = getFilePath(jsonFilePath);
-        String jsonFileName = getFileNameFromPath(jsonFilePath);
-        String expectedJsonText = CustomFileUtils.readFromFile(filePath, jsonFileName);
+        assertThatJson(actualResult).as("Дані не співпадають:")
+                .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
+    }
 
-        assertThatJson(actualResult).as("Дані не співпадають:").when(IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
+    @Тоді("результат запиту {string} містить наступні значення {string} у полі {string}")
+    public void verifyApiHasValuesInField(String path, String fieldValue, String fieldName) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var actualResult = getLastRequest(context, path).getResults();
+
+        assertThatJson(actualResult)
+                .as("Такого поля не існує в json-і:")
+                .inPath("$.." + fieldName)
+                .isPresent();
+        assertThatJson(actualResult)
+                .as("Дані в полі не співпадають:")
+                .inPath("$.." + fieldName)
+                .isArray()
+                .contains(fieldValue);
     }
 }
