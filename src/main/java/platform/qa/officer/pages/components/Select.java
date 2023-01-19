@@ -94,7 +94,7 @@ public class Select extends BasePage {
 
     private WebElement getItemByText(String itemValue) {
         return selectItems.stream()
-                .filter(item -> item.getText().startsWith(itemValue))
+                .filter(item -> item.getText().trim().startsWith(itemValue))
                 .findFirst().orElseThrow(() -> new NoSuchElementException("No value in list!"));
     }
 

@@ -219,7 +219,7 @@ public class TaskPage extends CommonTaskPage {
 
     public void clickAddRawEditGridButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName))))
+                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName, gridName))))
                 .click();
     }
 

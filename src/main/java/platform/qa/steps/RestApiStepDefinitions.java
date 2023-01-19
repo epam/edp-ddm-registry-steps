@@ -198,7 +198,7 @@ public class RestApiStepDefinitions {
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+                registryConfig.getRedis()).signRequest(paramsWithIds);
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
@@ -234,7 +234,7 @@ public class RestApiStepDefinitions {
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signRequest(paramsWithIds);
+                registryConfig.getRedis()).signRequest(paramsWithIds);
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
 
@@ -277,7 +277,7 @@ public class RestApiStepDefinitions {
                                         @NonNull String id) {
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getSignatureCeph()).signDeleteRequest(id);
+                registryConfig.getRedis()).signDeleteRequest(id);
 
         new RestApiClient(registryConfig.getDataFactory(userName), signature)
                 .delete(id, path + "/");
