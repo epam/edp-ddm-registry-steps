@@ -63,6 +63,7 @@ public class WebDriverProvider {
         chromePrefs.put("download.default_directory", chromeDownloadPath);
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
+        options.addArguments("--remote-allow-origins=*");
 
         if (runUITestConfig.isRemoteRunEnabled()) {
             options.setHeadless(true);
