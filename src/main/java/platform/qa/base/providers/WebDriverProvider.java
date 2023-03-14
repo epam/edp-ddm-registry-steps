@@ -51,7 +51,7 @@ public class WebDriverProvider {
         WebDriverManager.chromedriver().setup();
         WebDriver driver;
         driver = getDriver();
-        driver.manage().window().maximize(); //.setSize(new Dimension(1920, 1080));
+        driver.manage().window().maximize();
         return driver;
     }
 
@@ -63,7 +63,6 @@ public class WebDriverProvider {
         chromePrefs.put("download.default_directory", chromeDownloadPath);
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
-        options.addArguments("--remote-allow-origins=*");
 
         if (runUITestConfig.isRemoteRunEnabled()) {
             options.setHeadless(true);
