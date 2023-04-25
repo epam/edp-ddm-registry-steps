@@ -36,7 +36,6 @@ import platform.qa.officer.pages.TaskPage;
 import platform.qa.providers.impl.RegistryUserProvider;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -150,13 +149,13 @@ public class TaskStepDefinitions {
     public void userFillGridFieldsWithData(String gridName, List<FieldData> rows) {
         TaskPage taskPage = new TaskPage();
         taskPage
-                .clickAddRawEditGridButton(gridName);
+                .clickAddRowEditGridButton(gridName);
         for (FieldData fieldData : rows) {
             taskPage
                     .setFieldsData(fieldData);
         }
         taskPage
-                .clickSaveRawEditGridButton();
+                .clickSaveRowEditGridButton();
     }
 
     @ParameterType(value = "цифр|літер")

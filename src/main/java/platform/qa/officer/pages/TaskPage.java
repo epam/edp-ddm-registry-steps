@@ -49,7 +49,7 @@ public class TaskPage extends CommonTaskPage {
 
     @FindBy(xpath = "//button[contains(@ref, 'saveRow')] | //div[contains(@role, 'dialog')]"
             + "//button[contains(@type, 'submit')]")
-    protected WebElement saveRawEditGridButton;
+    protected WebElement saveRowEditGridButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -68,7 +68,7 @@ public class TaskPage extends CommonTaskPage {
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
     private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
-    private final String addRawEditGridButtonPath =
+    private final String addRowEditGridButtonPath =
             "//label[text()[contains(.,\"%1$s\")]]/parent::div//button |//label[text()[contains(.,\"%1$s\")]]/following-sibling::"
                     + "button | //label[text()[contains(.,\"%1$s\")]]/following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
 
@@ -217,15 +217,15 @@ public class TaskPage extends CommonTaskPage {
                 .click();
     }
 
-    public void clickAddRawEditGridButton(String gridName) {
+    public void clickAddRowEditGridButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName))))
+                .until(elementToBeClickable(xpath(format(addRowEditGridButtonPath, gridName))))
                 .click();
     }
 
-    public TaskPage clickSaveRawEditGridButton() {
+    public TaskPage clickSaveRowEditGridButton() {
         wait
-                .until(elementToBeClickable(saveRawEditGridButton))
+                .until(elementToBeClickable(saveRowEditGridButton))
                 .click();
         return this;
     }
