@@ -68,9 +68,9 @@ public class TaskPage extends CommonTaskPage {
     private final String textAreaPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//textarea";
     private final String contentTextPath = "//div[contains(@class,'formio-component-content')]";
-    private final String addRawEditGridButtonPath = "//label[text()[contains(.,\"%s\")]]/following-sibling::"
-            + "button | //label[text()[contains(.,\"%s\")]]/following-sibling::div/div[contains(@data-xpath, "
-            + "'Grid]')]/div/following-sibling::button";
+    private final String addRawEditGridButtonPath =
+            "//label[text()[contains(.,\"%1$s\")]]/parent::div//button |//label[text()[contains(.,\"%1$s\")]]/following-sibling::"
+                    + "button | //label[text()[contains(.,\"%1$s\")]]/following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
 
     public TaskPage() {
         super();
@@ -219,7 +219,7 @@ public class TaskPage extends CommonTaskPage {
 
     public void clickAddRawEditGridButton(String gridName) {
         wait
-                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName, gridName))))
+                .until(elementToBeClickable(xpath(format(addRawEditGridButtonPath, gridName))))
                 .click();
     }
 
