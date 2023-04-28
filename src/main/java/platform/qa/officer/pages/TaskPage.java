@@ -30,14 +30,18 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import lombok.extern.log4j.Log4j2;
+import org.openqa.selenium.interactions.Actions;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
 
 import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.Collectors;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -50,6 +54,9 @@ public class TaskPage extends CommonTaskPage {
     @FindBy(xpath = "//button[contains(@ref, 'saveRow')] | //div[contains(@role, 'dialog')]"
             + "//button[contains(@type, 'submit')]")
     protected WebElement saveRowEditGridButton;
+
+    @FindBy(xpath = "//a[contains(@class, 'draw-marker')]")
+    protected WebElement drawMakerButton;
 
     private final String inputPath = "//label[text()[contains(.,\"%s\")]]" +
             "/following-sibling::div//input[@type='text']";
@@ -71,6 +78,10 @@ public class TaskPage extends CommonTaskPage {
     private final String addRowEditGridButtonPath =
             "//label[text()[contains(.,\"%1$s\")]]/parent::div//button |//label[text()[contains(.,\"%1$s\")]]/following-sibling::"
                     + "button | //label[text()[contains(.,\"%1$s\")]]/following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
+    private static final int MIN_X_COORDINATE = 180;
+    private static final int MAX_X_COORDINATE = 950;
+    private static final int MIN_Y_COORDINATE = 10;
+    private static final int MAX_Y_COORDINATE = 400;
 
     public TaskPage() {
         super();
@@ -251,5 +262,13 @@ public class TaskPage extends CommonTaskPage {
         return Arrays.stream(text.split("\n"))
                 .map(String::trim)
                 .collect(Collectors.joining("\n"));
+    }
+
+    public void setPoint() {
+        wait.until(visibilityOf(drawMakerButton)).click();
+        Random random = new Random();
+        int x = random.nextInt((MAX_X_COORDINATE - MIN_X_COORDINATE) + MIN_X_COORDINATE);
+        int y = random.nextInt((MAX_Y_COORDINATE - MIN_Y_COORDINATE) + MIN_Y_COORDINATE);
+        new Actions(driver).moveToElement(drawMakerButton, x, y).click().build().perform();
     }
 }
