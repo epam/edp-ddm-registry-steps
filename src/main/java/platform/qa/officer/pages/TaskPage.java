@@ -34,17 +34,16 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import lombok.extern.log4j.Log4j2;
-import org.openqa.selenium.interactions.Actions;
 import platform.qa.entities.FieldData;
 import platform.qa.officer.pages.components.Select;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
@@ -142,7 +141,7 @@ public class TaskPage extends CommonTaskPage {
     public void checkRadioButtonIsChecked(String fieldData) {
         By radioButton = xpath(format(radioButtonInputPath, fieldData));
         wait.until(presenceOfElementLocated(radioButton));
-        wait.until(attributeContains(radioButton, "class", "Mui-checked"));
+        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver).findElement(radioButton).getAttribute("checked") != null);
     }
 
     public void checkCheckBox(String fieldName, String fieldData) {
