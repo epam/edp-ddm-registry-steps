@@ -141,7 +141,7 @@ public class TaskPage extends CommonTaskPage {
     public void checkRadioButtonIsChecked(String fieldData) {
         By radioButton = xpath(format(radioButtonInputPath, fieldData));
         wait.until(presenceOfElementLocated(radioButton));
-        wait.until((ExpectedCondition<Boolean>) driver -> driver.findElement(radioButton).getAttribute("checked") != null);
+        wait.until((ExpectedCondition<Boolean>) driver -> requireNonNull(driver).findElement(radioButton).getAttribute("checked") != null);
     }
 
     public void checkCheckBox(String fieldName, String fieldData) {
