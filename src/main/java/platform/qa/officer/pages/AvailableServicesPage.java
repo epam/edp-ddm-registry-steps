@@ -45,7 +45,7 @@ public class AvailableServicesPage extends OfficerBasePage {
 
     WebElement getProcessPath(String text) {
         String path = getTextPathWithDifferentQuotes(text);
-        return driver.findElement(By.xpath(String.format("//button[text()=%s]", path)));
+        return driver.findElement(By.xpath(String.format("//h5[text()=%s]", path)));
     }
 
     public AvailableServicesPage checkAvailableServicesHeader() {
