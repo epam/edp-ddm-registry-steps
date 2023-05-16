@@ -19,12 +19,9 @@ package platform.qa.enums;
 
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 @Getter
 public enum ValueType {
-    DIGIT ("цифр"),
+    DIGIT("цифр"),
     LETTER("літер");
 
     private final String valueType;
@@ -32,6 +29,7 @@ public enum ValueType {
     ValueType(String valueType) {
         this.valueType = valueType;
     }
+
     public String getValueType() {
         return this.valueType;
     }

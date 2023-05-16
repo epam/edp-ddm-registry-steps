@@ -191,9 +191,4 @@ public class TaskStepDefinitions {
         randomValueMap.put(randomValueKey, randomValueData);
         testContext.getScenarioContext().setContext(RANDOM_VALUE_MAP, randomValueMap);
     }
-
-    @І("встановлює точку на мапі")
-    public void setPointOnTheMap(){
-        new TaskPage().setPoint();
-    }
 }

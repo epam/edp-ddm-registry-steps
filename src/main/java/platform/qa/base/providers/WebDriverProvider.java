@@ -26,6 +26,7 @@ import platform.qa.configuration.RunUITestConfiguration;
 import java.io.File;
 import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -51,7 +52,7 @@ public class WebDriverProvider {
         WebDriverManager.chromedriver().setup();
         WebDriver driver;
         driver = getDriver();
-        driver.manage().window().maximize();
+        driver.manage().window().setSize(new Dimension(1920, 1080));
         return driver;
     }
 
@@ -63,7 +64,6 @@ public class WebDriverProvider {
         chromePrefs.put("download.default_directory", chromeDownloadPath);
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
-        options.addArguments("--remote-allow-origins=*");
 
         if (runUITestConfig.isRemoteRunEnabled()) {
             options.setHeadless(true);

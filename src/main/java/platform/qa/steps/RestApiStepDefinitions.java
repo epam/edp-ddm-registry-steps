@@ -18,11 +18,7 @@ package platform.qa.steps;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.both;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
 import static platform.qa.base.convertors.RestApiConvertor.convertToListMap;
 import static platform.qa.base.convertors.RestApiConvertor.getBodyWithIds;
@@ -59,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,7 +64,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Log4j2
 public class RestApiStepDefinitions {
-
     private MasterConfig masterConfig = MasterConfig.getInstance();
     private RegistryConfig registryConfig = masterConfig.getRegistryConfig();
     private TestContext testContext;
@@ -90,10 +84,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
-        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) {
-            log.info("parameters and ids don't match, GET request {} couldn't be send", path);
-            return;
-        }
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
 
         var result = new RestApiClient(registryConfig.getDataFactory(userName))
                 .sendGetWithParams(path, parametersWithIds)
@@ -115,10 +106,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var parametersWithIds = getQueryParamsWithIds(queryParams, context);
 
-        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) {
-            log.info("parameters and ids don't match, GET request {} couldn't be send", path);
-            return;
-        }
+        if (hasCurlyBracketsInQueryParameters(parametersWithIds)) return;
 
         masterConfig.setNamespaces(singletonList(registryName));
         var externalRegConfig = masterConfig.getRegistryConfig(registryName);
@@ -206,10 +194,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
-        if (hasCurlyBracketsInQueryParameters(paramsWithIds)) {
-            log.info("parameters and ids don't match, POST request {} couldn't be send", path);
-            return;
-        }
+        if (hasCurlyBracketsInQueryParameters(paramsWithIds)) return;
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),
@@ -223,45 +208,7 @@ public class RestApiStepDefinitions {
                 .statusCode(in(List.of(201, 409)))
                 .extract()
                 .response();
-        if (response.statusCode() == 409) {return;}
-
-        var result = response
-                .jsonPath()
-                .getMap("");
-
-        var updatedResult = getResultKeyConvertedToCamelCase(path, new HashMap<>(result));
-        var request = new Request(path, queryParams, singletonList(updatedResult), new Timestamp(currentTimeMillis()));
-        context.add(request);
-
-        testContext.getScenarioContext().setContext(API_RESULTS, context);
-    }
-
-    @SneakyThrows
-    @Коли("користувач {string} виконує запит створення {string} з тілом запиту та очікує успішний код відповіді")
-    public void executePostApiWithParametersAndExpectSuccess(String userName,
-            @NonNull String path,
-            @NonNull Map<String, String> queryParams) {
-        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
-        Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
-
-        if (hasCurlyBracketsInQueryParameters(paramsWithIds)) {
-            log.info("parameters and ids don't match, POST request couldn't be send", path);
-            return;
-        }
-
-        String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
-                registryConfig.getDigitalSignatureOps(userName),
-                registryConfig.getRedis()).signRequest(paramsWithIds);
-
-        String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
-
-        var response = new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .post(payload, path)
-                .then()
-                .statusCode(is(both(greaterThanOrEqualTo(HttpStatus.SC_OK))
-                        .and(lessThanOrEqualTo(HttpStatus.SC_MULTI_STATUS))))
-                .extract()
-                .response();
+        if (response.statusCode() == 409) return;
 
         var result = response
                 .jsonPath()
@@ -283,10 +230,7 @@ public class RestApiStepDefinitions {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         Map<String, Object> paramsWithIds = getBodyWithIds(queryParams, context);
 
-        if (paramsWithIds.containsValue(null)) {
-            log.info("parameters and ids don't match, PUT request {} couldn't be send", path);
-            return;
-        }
+        if (paramsWithIds.containsValue(null)) return;
 
         String signature = new SignatureSteps(registryConfig.getDataFactory(userName),
                 registryConfig.getDigitalSignatureOps(userName),

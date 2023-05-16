@@ -167,17 +167,17 @@ public class DataModelStepDefinitions {
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
-    
+
     @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, ігноруючи невказані:")
     public void verifyDataModelReturnJsonWithDataFromExpected(String path, String expectedJsonText) {
         var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
         var actualResult = getLastRequest(context, path).getResults();
-        
+
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS).isEqualTo(expectedJsonText);
     }
-    
-    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, відсортовані по полю " 
+
+    @Тоді("дата модель за запитом {string} повертає json, який містить точно наступні дані, відсортовані по полю "
             + "{string} ігноруючи невказані:")
     public void verifyDataModelReturnJsonWithDataFromExpected(String path, String sortingFieldName,
                                                               String expectedJsonText) {
@@ -197,7 +197,7 @@ public class DataModelStepDefinitions {
 
         Assertions.assertThat(sortedActualSortingFieldValues).as("Дані невірно відсортовані")
                 .isEqualTo(actualSortingFieldValues);
-        
+
         assertThatJson(actualResult).as("Дані не співпадають:")
                 .when(IGNORING_EXTRA_FIELDS, IGNORING_ARRAY_ORDER).isEqualTo(expectedJsonText);
     }
@@ -217,5 +217,4 @@ public class DataModelStepDefinitions {
                 .isArray()
                 .contains(fieldValue);
     }
-
 }
