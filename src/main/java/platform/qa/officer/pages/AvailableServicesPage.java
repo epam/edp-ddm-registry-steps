@@ -18,6 +18,7 @@ package platform.qa.officer.pages;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static platform.qa.enums.Section.AVAILABLE_SERVICES;
 
 import lombok.Getter;
 import platform.qa.officer.panel.OfficerHeaderPanel;
@@ -33,7 +34,8 @@ public class AvailableServicesPage extends OfficerBasePage {
     @Getter
     private final OfficerHeaderPanel headerPanel = new OfficerHeaderPanel();
 
-    private final String availableServices = "Доступні послуги";
+    private final String availableServices = AVAILABLE_SERVICES.getSection();
+
     @FindBy(xpath = "//div[@data-xpath='header']/following-sibling" + "::div//h1")
     private WebElement availableServicesHeader;
 
@@ -43,9 +45,14 @@ public class AvailableServicesPage extends OfficerBasePage {
         checkAvailableServicesHeader();
     }
 
-    WebElement getProcessPath(String text) {
-        String path = getTextPathWithDifferentQuotes(text);
-        return driver.findElement(By.xpath(String.format("//h5[text()=%s]", path)));
+    WebElement getProcessPath(String processName) {
+        String processNameWithDifferentQuotes = getTextPathWithDifferentQuotes(processName);
+        return driver.findElement(By.xpath(String.format("//h5[text()=%s]", processNameWithDifferentQuotes)));
+    }
+
+    WebElement getProcessGroupPath(String processGroupName) {
+        String processGroupNameWithDifferentQuotes = getTextPathWithDifferentQuotes(processGroupName);
+        return driver.findElement(By.xpath(String.format("//h3[text()=%s]", processGroupNameWithDifferentQuotes)));
     }
 
     public AvailableServicesPage checkAvailableServicesHeader() {
@@ -58,8 +65,19 @@ public class AvailableServicesPage extends OfficerBasePage {
                 .click();
     }
 
+    public AvailableServicesPage clickOnProcessGroupByName(String processGroupName) {
+        wait.until(visibilityOf(getProcessGroupPath(processGroupName)))
+                .click();
+        return this;
+    }
+
     public AvailableServicesPage checkProcessByName(String processName) {
         wait.until(visibilityOf(getProcessPath(processName)));
+        return this;
+    }
+
+    public AvailableServicesPage checkProcessGroupByName(String processGroupName) {
+        wait.until(visibilityOf(getProcessGroupPath(processGroupName)));
         return this;
     }
 

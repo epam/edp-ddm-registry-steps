@@ -91,16 +91,14 @@ public class MyTasksPage extends OfficerBasePage {
     }
 
     public MyTasksPage clickOnProvisionedTasksTab() {
-        wait
-                .until(visibilityOf(provisionedTasksTab))
+        wait.until(visibilityOf(provisionedTasksTab))
                 .click();
         return new MyTasksPage();
     }
 
     public MyTasksPage checkNotificationMessage(String taskName) {
         String message = String.format("Вітаємо!\nЗадача “%s” виконана успішно!", taskName);
-        wait
-                .until(visibilityOf(timedCreatedNotification));
+        wait.until(visibilityOf(timedCreatedNotification));
         assertThat(timedCreatedNotification.getText()).as("Поточне повідомлення не збігається з очікуваним").isEqualTo(message);
         return this;
     }

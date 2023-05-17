@@ -18,12 +18,18 @@ package platform.qa.steps.cabinet;
 
 import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
 
+import io.cucumber.java.ParameterType;
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Тоді;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
+import platform.qa.enums.Section;
+import platform.qa.officer.pages.DashboardPage;
 import platform.qa.officer.steps.LoginSteps;
 import platform.qa.providers.impl.RegistryUserProvider;
+
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
  * Cucumber step definitions for cabinet portal Dashboard page
@@ -49,4 +55,37 @@ public class DashboardStepDefinitions {
                 .logoutOfficerPortal();
     }
 
+    private Section getSection(String entry) {
+        try {
+            return Arrays.stream(Section.values())
+                    .filter(value -> value.getSection().equalsIgnoreCase(entry))
+                    .findFirst()
+                    .orElseThrow();
+        } catch (NoSuchElementException ex) {
+            return Section.valueOf(entry);
+        }
+    }
+
+    @ParameterType(value = "Доступні послуги|доступні послуги|ДОСТУПНІ ПОСЛУГИ|"
+            + "Мої послуги|мої послуги|МОЇ ПОСЛУГИ|"
+            + "Мої задачі|мої задачі|МОЇ ЗАДАЧІ|"
+            + "Звіти|звіти|ЗВІТИ")
+    public Section section(String sectionName) {
+        return getSection(sectionName);
+    }
+
+    @Дано("переходить до розділу {section}")
+    public void openSection(Section section) {
+        switch (section) {
+            case AVAILABLE_SERVICES:
+                new DashboardPage().clickOnAvailableServices();
+                break;
+            case MY_SERVICES:
+                new DashboardPage().clickOnMyServices();
+                break;
+            case MY_TASKS:
+                new DashboardPage().clickOnMyTasks();
+                break;
+        }
+    }
 }

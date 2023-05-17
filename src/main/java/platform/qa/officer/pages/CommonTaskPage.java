@@ -46,8 +46,7 @@ public abstract class CommonTaskPage extends BasePage {
     }
 
     public void clickButton(String buttonName) {
-        wait
-                .until(elementToBeClickable(xpath(format(buttonXpath, buttonName))))
+        wait.until(elementToBeClickable(xpath(format(buttonXpath, buttonName))))
                 .click();
     }
 }

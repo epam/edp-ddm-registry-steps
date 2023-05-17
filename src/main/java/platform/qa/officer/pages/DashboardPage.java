@@ -17,6 +17,10 @@
 package platform.qa.officer.pages;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static platform.qa.enums.Section.AVAILABLE_SERVICES;
+import static platform.qa.enums.Section.MY_SERVICES;
+import static platform.qa.enums.Section.MY_TASKS;
+import static platform.qa.enums.Section.REPORTS;
 
 import lombok.Getter;
 import platform.qa.officer.panel.OfficerHeaderPanel;
@@ -29,10 +33,10 @@ public class DashboardPage extends OfficerBasePage {
     @Getter
     private final OfficerHeaderPanel headerPanel = new OfficerHeaderPanel();
 
-    private final String availableServices = "Доступні послуги";
-    private final String myServices = "Мої послуги";
-    private final String myTasks = "Мої задачі";
-    private final String reports = "Звіти";
+    private final String availableServices = AVAILABLE_SERVICES.getSection();
+    private final String myServices = MY_SERVICES.getSection();
+    private final String myTasks = MY_TASKS.getSection();
+    private final String reports = REPORTS.getSection();
 
     public DashboardPage() {
         loadingPage();
@@ -69,9 +73,20 @@ public class DashboardPage extends OfficerBasePage {
     }
 
     public AvailableServicesPage clickOnAvailableServices() {
-        wait
-                .until(visibilityOf(availableServices(availableServices)))
+        wait.until(visibilityOf(availableServices(availableServices)))
                 .click();
         return new AvailableServicesPage();
+    }
+
+    public MyServicesPage clickOnMyServices() {
+        wait.until(visibilityOf(myServices(myServices)))
+                .click();
+        return new MyServicesPage();
+    }
+
+    public MyTasksPage clickOnMyTasks() {
+        wait.until(visibilityOf(myTasks(myTasks)))
+                .click();
+        return new MyTasksPage();
     }
 }

@@ -237,7 +237,7 @@ public class RestApiStepDefinitions {
     }
 
     @SneakyThrows
-    @Коли("користувач {string} виконує запит створення {string} з тілом запиту та очікує успішний код відповіді")
+    @Коли("користувач {string} виконує запит створення {string} з тілом запиту та отримує успішний код відповіді")
     public void executePostApiWithParametersAndExpectSuccess(String userName,
                                                              @NonNull String path,
                                                              @NonNull Map<String, String> queryParams) {

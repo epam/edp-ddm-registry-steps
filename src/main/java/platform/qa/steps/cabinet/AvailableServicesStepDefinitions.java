@@ -20,7 +20,6 @@ import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Коли;
 import platform.qa.cucumber.TestContext;
 import platform.qa.officer.pages.AvailableServicesPage;
-import platform.qa.officer.pages.DashboardPage;
 
 /**
  * Cucumber step definitions for cabinet portal available services page
@@ -32,16 +31,26 @@ public class AvailableServicesStepDefinitions {
         this.testContext = testContext;
     }
 
-
     @Дано("бачить доступний процес {string}")
     public void verifyProcessAvailable(String processName) {
-        new DashboardPage()
-                .clickOnAvailableServices()
+        new AvailableServicesPage()
                 .checkProcessByName(processName);
     }
 
+    @Дано("бачить доступну групу процесів {string}")
+    public void verifyProcessGroupAvailable(String processGroupName) {
+        new AvailableServicesPage()
+                .checkProcessGroupByName(processGroupName);
+    }
+
+    @Дано("відкриває групу процесів {string}")
+    public void userOpenProcessGroup(String processGroupName){
+        new AvailableServicesPage()
+                .clickOnProcessGroupByName(processGroupName);
+    }
+
     @Коли("користувач ініціює процес {string}")
-    public void verifyUserStartProcess(String processName) {
+    public void userStartProcess(String processName) {
         new AvailableServicesPage()
                 .clickOnProcessByName(processName);
     }

@@ -77,10 +77,6 @@ public class TaskPage extends CommonTaskPage {
     private final String addRowEditGridButtonPath =
             "//label[text()[contains(.,\"%1$s\")]]/parent::div//button |//label[text()[contains(.,\"%1$s\")]]/following-sibling::"
                     + "button | //label[text()[contains(.,\"%1$s\")]]/following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
-    private static final int MIN_X_COORDINATE = 180;
-    private static final int MAX_X_COORDINATE = 950;
-    private static final int MIN_Y_COORDINATE = 10;
-    private static final int MAX_Y_COORDINATE = 400;
 
     public TaskPage() {
         super();
@@ -222,20 +218,17 @@ public class TaskPage extends CommonTaskPage {
     }
 
     public void addNewRow(String tableName) {
-        wait
-                .until(elementToBeClickable(xpath(format(addNewRowButtonPath, tableName))))
+        wait.until(elementToBeClickable(xpath(format(addNewRowButtonPath, tableName))))
                 .click();
     }
 
     public void clickAddRowEditGridButton(String gridName) {
-        wait
-                .until(elementToBeClickable(xpath(format(addRowEditGridButtonPath, gridName))))
+        wait.until(elementToBeClickable(xpath(format(addRowEditGridButtonPath, gridName))))
                 .click();
     }
 
     public TaskPage clickSaveRowEditGridButton() {
-        wait
-                .until(elementToBeClickable(saveRowEditGridButton))
+        wait.until(elementToBeClickable(saveRowEditGridButton))
                 .click();
         return this;
     }
@@ -263,11 +256,8 @@ public class TaskPage extends CommonTaskPage {
                 .collect(Collectors.joining("\n"));
     }
 
-    public void setPoint() {
+    public void setPoint(int x, int y) {
         wait.until(visibilityOf(drawMakerButton)).click();
-        Random random = new Random();
-        int x = random.nextInt((MAX_X_COORDINATE - MIN_X_COORDINATE) + MIN_X_COORDINATE);
-        int y = random.nextInt((MAX_Y_COORDINATE - MIN_Y_COORDINATE) + MIN_Y_COORDINATE);
         new Actions(driver).moveToElement(drawMakerButton, x, y).click().build().perform();
     }
 }

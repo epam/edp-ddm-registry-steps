@@ -61,7 +61,7 @@ public class TaskStepDefinitions {
     private FieldType getFieldType(String entry) {
         try {
             return Arrays.stream(FieldType.values())
-                    .filter(value -> value.getType().equals(entry))
+                    .filter(value -> value.getFieldType().equals(entry))
                     .findFirst()
                     .orElseThrow();
         } catch (NoSuchElementException ex) {
@@ -192,8 +192,8 @@ public class TaskStepDefinitions {
         testContext.getScenarioContext().setContext(RANDOM_VALUE_MAP, randomValueMap);
     }
 
-    @І("встановлює точку на мапі")
-    public void setPointOnTheMap(){
-        new TaskPage().setPoint();
+    @І("встановлює точку з координатами x: {int} та y: {int} на мапі")
+    public void setPointOnTheMap(int x, int y){
+        new TaskPage().setPoint(x,y);
     }
 }

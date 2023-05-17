@@ -39,14 +39,12 @@ public class LoginPage extends OfficerBasePage {
 
     public LoginPage openPage() {
         openPage(baseUrl);
-        wait
-                .until(urlToBe(getExpectedLoginUrl()));
+        wait.until(urlToBe(getExpectedLoginUrl()));
         return this;
     }
 
     public AuthWithCesPage clickAuthorizationButton() {
-        wait
-                .until(visibilityOf(authButton))
+        wait.until(visibilityOf(authButton))
                 .click();
         return new AuthWithCesPage();
     }

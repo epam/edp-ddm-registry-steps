@@ -16,17 +16,18 @@
 
 package platform.qa.enums;
 
-
 import lombok.Getter;
 
 @Getter
-public enum ValueType {
-    DIGIT("цифр"),
-    LETTER("літер");
+public enum Section {
+    AVAILABLE_SERVICES("Доступні послуги"),
+    MY_SERVICES("Мої послуги"),
+    MY_TASKS("Мої задачі"),
+    REPORTS("Звіти");
 
-    private final String valueType;
+    private final String section;
 
-    ValueType(String valueType) {
-        this.valueType = valueType;
+    Section(String section) {
+        this.section = section;
     }
 }

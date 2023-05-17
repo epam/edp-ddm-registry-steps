@@ -21,18 +21,15 @@ import lombok.Getter;
 
 @Getter
 public enum FieldType {
-    RADIOBUTTON ("radiobutton"),
+    RADIOBUTTON("radiobutton"),
     CHECKBOX("checkbox"),
-    INPUT ("input"),
-    SELECT ("select"),
+    INPUT("input"),
+    SELECT("select"),
     DATETIME("datetime");
 
     private final String fieldType;
 
     FieldType(String fieldType) {
         this.fieldType = fieldType;
-    }
-    public String getType() {
-        return this.fieldType;
     }
 }
