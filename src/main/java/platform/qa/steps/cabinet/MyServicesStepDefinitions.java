@@ -34,13 +34,13 @@ public class MyServicesStepDefinitions {
     public void verifyServiceIdentifierDone(String processDefinitionName, String businessKey, String result) {
         new OfficerHeaderPanel().clickOnMyServicesLink()
                 .clickOnProvidedServicesTab()
-                .checkProcessExistsByNameBusinessKeyAndResult(processDefinitionName, businessKey, result);
+                .checkProcessExistsByNameBusinessKeyAndResult(processDefinitionName, businessKey, result, testContext);
     }
 
     @Тоді("послуга {string} з ідентифікатором {string} знаходиться у статусі: Послуги у виконанні")
     public void verifyServiceIdentifierInProgress(String processDefinitionName, String businessKey) {
         new OfficerHeaderPanel().clickOnMyServicesLink()
-                .checkProcessExistsByNameAndBusinessKey(processDefinitionName, businessKey);
+                .checkProcessExistsByNameAndBusinessKey(processDefinitionName, businessKey, testContext);
     }
 
 

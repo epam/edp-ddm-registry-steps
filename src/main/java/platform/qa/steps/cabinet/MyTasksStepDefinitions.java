@@ -44,25 +44,25 @@ public class MyTasksStepDefinitions {
     public void verifyTaskServiceIdentifierInProgress(String taskName, String processDefinitionName,
                                                       String businessKey) {
         new OfficerHeaderPanel().clickOnMyTasksLink()
-                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
+                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName, testContext);
     }
 
     @Тоді("задача {string} за послугою {string} з ідентифікатором {string} виконана")
     public void verifyTaskServiceIdentifierDone(String taskName, String processDefinitionName, String businessKey) {
         new OfficerHeaderPanel().clickOnMyTasksLink()
                 .clickOnProvisionedTasksTab()
-                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName);
+                .checkTaskExistsByProcessBusinessKeyTaskName(processDefinitionName, businessKey, taskName, testContext);
     }
 
     @Тоді("приймає задачу {string} за послугою {string} з ідентифікатором {string}")
     public void acceptTask(String taskName, String processDefinitionName, String businessKey) {
         new OfficerHeaderPanel().clickOnMyTasksLink()
-                .acceptTask(processDefinitionName, businessKey, taskName);
+                .acceptTask(processDefinitionName, businessKey, taskName, testContext);
     }
 
     @Тоді("виконує задачу {string} за послугою {string} з ідентифікатором {string}")
     public void submitTask(String taskName, String processDefinitionName, String businessKey) {
         new OfficerHeaderPanel().clickOnMyTasksLink()
-                .submitTask(processDefinitionName, businessKey, taskName);
+                .submitTask(processDefinitionName, businessKey, taskName, testContext);
     }
 }

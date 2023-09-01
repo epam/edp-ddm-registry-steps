@@ -25,7 +25,8 @@ public enum FieldType {
     CHECKBOX("checkbox"),
     INPUT("input"),
     SELECT("select"),
-    DATETIME("datetime");
+    DATETIME("datetime"),
+    TEXTAREA("textarea");
 
     private final String fieldType;
 

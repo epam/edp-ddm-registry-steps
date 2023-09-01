@@ -16,8 +16,28 @@
 
 package platform.qa.officer.pages;
 
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FilenameUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import platform.qa.cucumber.TestContext;
+import platform.qa.entities.FieldData;
+import platform.qa.entities.context.Request;
+import platform.qa.officer.pages.components.Select;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.substringBetween;
 import static org.openqa.selenium.By.xpath;
 import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.openqa.selenium.Keys.END;
@@ -32,20 +52,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElements
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-
-import lombok.extern.log4j.Log4j2;
-import platform.qa.entities.FieldData;
-import platform.qa.officer.pages.components.Select;
-
-import java.util.Arrays;
-import java.util.Random;
-import java.util.stream.Collectors;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import static platform.qa.base.convertors.ContextConvertor.convertToRandomMapContext;
+import static platform.qa.base.convertors.ContextConvertor.convertToRequestsContext;
+import static platform.qa.enums.Context.API_RESULTS;
+import static platform.qa.enums.Context.RANDOM_VALUE_MAP;
 
 @Log4j2
 public class TaskPage extends CommonTaskPage {
@@ -77,6 +87,10 @@ public class TaskPage extends CommonTaskPage {
     private final String addRowEditGridButtonPath =
             "//label[text()[contains(.,\"%1$s\")]]/parent::div//button |//label[text()[contains(.,\"%1$s\")]]/following-sibling::"
                     + "button | //label[text()[contains(.,\"%1$s\")]]/following-sibling::div/div[contains(@data-xpath, 'Grid]')]/div/following-sibling::button";
+    private final String uploadButtonPath = "//label[contains(text(), \"%1$s\")]/following-sibling::div[@ref='fileDrop']/a";
+    private final String inputFile = "//input[@type='file']";
+    private final String progressBar = "//div[contains(@class,'progress-bar')]";
+    private static final String PATH_TO_FILE = "src/test/resources/files/";
 
     public TaskPage() {
         super();
@@ -96,6 +110,16 @@ public class TaskPage extends CommonTaskPage {
                         .findElement(inputField)
                         .isEnabled());
         driver.findElement(inputField).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData);
+    }
+
+    public void fillTextareaFieldWithData(String fieldName, String fieldData) {
+        By textAreaField = xpath(format(this.textAreaPath, fieldName));
+        wait.until(presenceOfElementLocated(textAreaField));
+        wait.until((ExpectedCondition<Boolean>) driver ->
+                requireNonNull(driver)
+                        .findElement(textAreaField)
+                        .isEnabled());
+        driver.findElement(textAreaField).sendKeys(HOME, chord(SHIFT, END), BACK_SPACE, fieldData);
     }
 
     public void checkFieldIsFilledWithData(String fieldXpath, String fieldData) {
@@ -179,6 +203,13 @@ public class TaskPage extends CommonTaskPage {
         checkTextInsideBlock(content, fieldData);
     }
 
+    public void userFillFormFieldsWithData(List<FieldData> rows, TestContext testContext) {
+        for (FieldData fieldData : rows) {
+            processValue(testContext, fieldData);
+            new TaskPage().setFieldsData(fieldData);
+        }
+    }
+
     public void setFieldsData(FieldData fieldData) {
         switch (fieldData.getType()) {
             case RADIOBUTTON:
@@ -196,10 +227,14 @@ public class TaskPage extends CommonTaskPage {
             case DATETIME:
                 selectDataFromDateTime(fieldData.getName(), fieldData.getValue());
                 break;
+            case TEXTAREA:
+                fillTextareaFieldWithData(fieldData.getName(), fieldData.getValue());
+                break;
         }
     }
 
-    public void checkFieldsData(FieldData fieldData) {
+    public void checkFieldsData(FieldData fieldData, TestContext testContext) {
+        processValue(testContext, fieldData);
         switch (fieldData.getType()) {
             case RADIOBUTTON:
                 checkRadioButtonIsChecked(fieldData.getValue());
@@ -213,6 +248,9 @@ public class TaskPage extends CommonTaskPage {
                 break;
             case DATETIME:
                 checkFieldIsFilledWithData(format(dateTimePath, fieldData.getName()), fieldData.getValue());
+                break;
+            case TEXTAREA:
+                checkTextareaText(fieldData.getName(), fieldData.getValue());
                 break;
         }
     }
@@ -259,5 +297,39 @@ public class TaskPage extends CommonTaskPage {
     public void setPoint(int x, int y) {
         wait.until(visibilityOf(drawMakerButton)).click();
         new Actions(driver).moveToElement(drawMakerButton, x, y).click().build().perform();
+    }
+
+    public void uploadFile(String fileName, String fieldName) {
+        disableClickEventOnInputFile();
+        wait.until(elementToBeClickable(xpath(format(uploadButtonPath, fieldName)))).click();
+        File file = new File(PATH_TO_FILE, FilenameUtils.getName(fileName));
+        if (file.exists()) {
+            driver.findElement(xpath(inputFile)).sendKeys(file.getAbsolutePath());
+            wait.until(not(visibilityOfElementLocated(xpath(progressBar))));
+        }
+    }
+
+    public void disableClickEventOnInputFile() {
+        ((JavascriptExecutor) driver)
+                .executeScript("HTMLInputElement.prototype.click = function() { if(this.type !== 'file') HTMLElement"
+                        + ".prototype.click.call(this);};");
+    }
+
+    private void processValue(TestContext testContext, FieldData fieldData) {
+        var context = convertToRequestsContext(testContext.getScenarioContext().getContext(API_RESULTS));
+        var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
+        String valueKey = substringBetween(fieldData.getValue(), "{", "}");
+        if (fieldData.getValue().startsWith("{")
+                && fieldData.getValue().endsWith("}")
+                && randomValueMap.containsKey(valueKey)) {
+            fieldData.setValue(randomValueMap.get(valueKey));
+        } else if (fieldData.getValue().startsWith("{")
+                && fieldData.getValue().endsWith("}")
+                && context.stream().anyMatch(request -> request.isResultContainsKey(valueKey))) {
+            var lastRequest = context.stream()
+                    .filter(request -> request.isResultContainsKey(valueKey))
+                    .max(Request::compareTo);
+            lastRequest.ifPresent(request -> fieldData.setValue(request.getResultValueByKey(valueKey)));
+        }
     }
 }

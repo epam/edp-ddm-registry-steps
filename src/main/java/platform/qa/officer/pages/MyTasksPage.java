@@ -16,18 +16,19 @@
 
 package platform.qa.officer.pages;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-
 import lombok.Getter;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import platform.qa.cucumber.TestContext;
 import platform.qa.officer.pages.components.Row;
 import platform.qa.officer.pages.components.Table;
 import platform.qa.officer.panel.OfficerHeaderPanel;
 
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static platform.qa.base.utils.ValueUtils.replaceValueFragmentWithValueFromRequest;
 
 public class MyTasksPage extends OfficerBasePage {
 
@@ -49,17 +50,17 @@ public class MyTasksPage extends OfficerBasePage {
         checkMyTasksHeader();
     }
 
-    public MyTasksPage acceptTask(String definitionName, String businessKey, String taskName) {
-        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
+    public MyTasksPage acceptTask(String definitionName, String businessKey, String taskName, TestContext testContext) {
+        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName, testContext);
         WebElement actionButton = row.getActionButton();
         wait.until(textToBePresentInElement(actionButton, "Прийняти"));
         wait.until(elementToBeClickable(actionButton)).click();
         return new MyTasksPage();
     }
 
-    public TaskPage submitTask(String definitionName, String businessKey, String taskName) {
+    public TaskPage submitTask(String definitionName, String businessKey, String taskName, TestContext testContext) {
         Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName,
-                businessKey, taskName);
+                businessKey, taskName, testContext);
         WebElement actionButton = row.getActionButton();
         wait.until(textToBePresentInElement(actionButton, "Виконати"));
         wait.until(elementToBeClickable(actionButton)).click();
@@ -67,8 +68,8 @@ public class MyTasksPage extends OfficerBasePage {
     }
 
     public MyTasksPage checkTaskExistsByProcessBusinessKeyTaskName(String definitionName, String businessKey,
-                                                                   String taskName) {
-        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName);
+            String taskName, TestContext testContext) {
+        Row row = new Table().getLastRowByProcessBusinessKeyTaskName(definitionName, businessKey, taskName, testContext);
         assertThat(row).as(String.format("Немає запису з Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)",
                 definitionName, businessKey, taskName)).isNotNull();
         return this;
@@ -80,8 +81,8 @@ public class MyTasksPage extends OfficerBasePage {
     }
 
     public MyTasksPage checkTaskExistsByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
-                                                                            String businessKey) {
-        new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey);
+                                                                            String businessKey, TestContext testContext) {
+        new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName, businessKey, testContext);
         return this;
     }
 

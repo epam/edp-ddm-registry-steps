@@ -1,3 +1,20 @@
+/*
+
+ * Copyright 2022 EPAM Systems.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package platform.qa.steps.cabinet;
 
 import static java.util.Objects.isNull;
@@ -44,11 +61,11 @@ public class ExcerptStepDefinitions {
         testContext.getScenarioContext().setContext(DOWNLOAD_FILES, files);
         new OfficerHeaderPanel().clickOnMyServicesLink()
                 .clickOnProvidedServicesTab()
-                .downloadExcerpt(processDefinitionName, businessKey);
+                .downloadExcerpt(processDefinitionName, businessKey, testContext);
     }
 
-    @Тоді("витяг послуги {string} з ідентифікатором {string} завантажено")
-    public void checkExcerptDownloaded(String processDefinitionName, String businessKey) {
+    @Тоді("витяг завантажено")
+    public void checkExcerptDownloaded() {
         List<File> beforeLoadFiles = convertToFileList(testContext.getScenarioContext().getContext(DOWNLOAD_FILES));
         File downloadDir = new File(WebDriverProvider.chromeDownloadPath);
         await()

@@ -16,16 +16,12 @@
 
 package platform.qa.steps.cabinet;
 
-import static org.apache.commons.lang3.StringUtils.substringBetween;
-import static platform.qa.base.convertors.ContextConvertor.convertToRandomMapContext;
-import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
-import static platform.qa.enums.Context.RANDOM_VALUE_MAP;
-
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.uk.І;
 import io.cucumber.java.uk.Коли;
 import io.cucumber.java.uk.Та;
+import org.apache.commons.lang.RandomStringUtils;
 import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.entities.FieldData;
@@ -40,12 +36,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.apache.commons.lang.RandomStringUtils;
+
+import static platform.qa.base.convertors.ContextConvertor.convertToRandomMapContext;
+import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
+import static platform.qa.enums.Context.RANDOM_VALUE_MAP;
 
 /**
  * Cucumber step definitions for cabinet portal different task (forms)
  */
 public class TaskStepDefinitions {
+
     private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
@@ -88,21 +88,14 @@ public class TaskStepDefinitions {
 
     @Коли("користувач заповнює форму даними$")
     public void userFillFormFieldsWithData(List<FieldData> rows) {
-        var randomValueMap = convertToRandomMapContext(testContext.getScenarioContext().getContext(RANDOM_VALUE_MAP));
-        for (FieldData fieldData : rows) {
-            if (fieldData.getValue().startsWith("{")) {
-                fieldData.setValue(randomValueMap.get(substringBetween(fieldData.getValue(), "{", "}")));
-            }
-            new TaskPage()
-                    .setFieldsData(fieldData);
-        }
+        new TaskPage().userFillFormFieldsWithData(rows, testContext);
     }
 
     @Коли("бачить передзаповнені поля із даними$")
     public void userSeesFieldsWithData(List<FieldData> rows) {
         for (FieldData fieldData : rows) {
             new TaskPage()
-                    .checkFieldsData(fieldData);
+                    .checkFieldsData(fieldData, testContext);
         }
     }
 
@@ -148,14 +141,9 @@ public class TaskStepDefinitions {
     @І("додає запис до {string} таблиці із даними")
     public void userFillGridFieldsWithData(String gridName, List<FieldData> rows) {
         TaskPage taskPage = new TaskPage();
-        taskPage
-                .clickAddRowEditGridButton(gridName);
-        for (FieldData fieldData : rows) {
-            taskPage
-                    .setFieldsData(fieldData);
-        }
-        taskPage
-                .clickSaveRowEditGridButton();
+        taskPage.clickAddRowEditGridButton(gridName);
+        taskPage.userFillFormFieldsWithData(rows, testContext);
+        taskPage.clickSaveRowEditGridButton();
     }
 
     @ParameterType(value = "цифр|літер")
@@ -193,7 +181,12 @@ public class TaskStepDefinitions {
     }
 
     @І("встановлює точку з координатами x: {int} та y: {int} на мапі")
-    public void setPointOnTheMap(int x, int y){
-        new TaskPage().setPoint(x,y);
+    public void setPointOnTheMap(int x, int y) {
+        new TaskPage().setPoint(x, y);
+    }
+
+    @І("користувач додає файл {string} у поле {string}")
+    public void addFileToForm(String fileName, String fieldName) {
+        new TaskPage().uploadFile(fileName, fieldName);
     }
 }

@@ -31,6 +31,7 @@ import static platform.qa.base.convertors.RestApiConvertor.getRequestPathWithIds
 import static platform.qa.base.convertors.RestApiConvertor.getResultKeyConvertedToCamelCase;
 import static platform.qa.base.utils.RequestUtils.getLastRequest;
 import static platform.qa.base.utils.RequestUtils.hasCurlyBracketsInQueryParameters;
+import static platform.qa.base.utils.ValueUtils.replaceValueFragmentWithValueFromRequest;
 import static platform.qa.enums.Context.API_RESULTS;
 
 import io.cucumber.java.uk.Коли;
@@ -293,9 +294,10 @@ public class RestApiStepDefinitions {
                 registryConfig.getRedis()).signRequest(paramsWithIds);
 
         String payload = new ObjectMapper().writeValueAsString(paramsWithIds);
+        String processedId = replaceValueFragmentWithValueFromRequest(id, testContext);
 
         new RestApiClient(registryConfig.getDataFactory(userName), signature)
-                .put(id, payload, path);
+                .put(processedId, payload, path);
     }
 
     @Тоді("користувач {string} виконує запит {string} видалення даних створених в сценарії з назвою параметру {string}")

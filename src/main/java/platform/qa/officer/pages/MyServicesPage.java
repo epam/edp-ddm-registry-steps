@@ -16,17 +16,18 @@
 
 package platform.qa.officer.pages;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
-
 import lombok.Getter;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import platform.qa.cucumber.TestContext;
 import platform.qa.officer.pages.components.Row;
 import platform.qa.officer.pages.components.Table;
 import platform.qa.officer.panel.OfficerHeaderPanel;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static platform.qa.base.utils.ValueUtils.replaceValueFragmentWithValueFromRequest;
 
 public class MyServicesPage extends OfficerBasePage {
 
@@ -56,20 +57,20 @@ public class MyServicesPage extends OfficerBasePage {
     }
 
     public MyServicesPage checkProcessExistsByNameBusinessKeyAndResult(String processDefinitionName,
-                                                                       String businessKey, String result) {
-        new Table().getLastRowFromTableByProcessBusinessKeyAndResult(processDefinitionName, businessKey, result);
+            String businessKey, String result, TestContext testContext) {
+        new Table().getLastRowFromTableByProcessBusinessKeyAndResult(processDefinitionName, businessKey, result, testContext);
         return this;
     }
 
-    public MyServicesPage checkProcessExistsByNameAndBusinessKey(String processDefinitionName, String businessKey) {
+    public MyServicesPage checkProcessExistsByNameAndBusinessKey(String processDefinitionName, String businessKey, TestContext testContext) {
         new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
-                businessKey);
+                businessKey, testContext);
         return this;
     }
 
-    public MyServicesPage downloadExcerpt(String processDefinitionName, String businessKey) {
+    public MyServicesPage downloadExcerpt(String processDefinitionName, String businessKey, TestContext testContext) {
         Row serviceRow = new Table().getLastRowFromTableByProcessDefinitionNameAndBusinessKey(processDefinitionName,
-                businessKey);
+                businessKey, testContext);
         WebElement excerptButton = serviceRow.getResult().findElement(By.xpath("div/button"));
         wait.until(elementToBeClickable(excerptButton));
         wait.until(textToBePresentInElement(excerptButton, "Завантажити витяг"));

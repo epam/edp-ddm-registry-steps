@@ -16,8 +16,6 @@
 
 package platform.qa.steps.cabinet;
 
-import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
-
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.uk.Дано;
 import io.cucumber.java.uk.Тоді;
@@ -25,16 +23,20 @@ import platform.qa.configuration.MasterConfig;
 import platform.qa.cucumber.TestContext;
 import platform.qa.enums.Section;
 import platform.qa.officer.pages.DashboardPage;
+import platform.qa.officer.panel.OfficerHeaderPanel;
 import platform.qa.officer.steps.LoginSteps;
 import platform.qa.providers.impl.RegistryUserProvider;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+import static platform.qa.enums.Context.OFFICER_USER_LOGIN;
+
 /**
  * Cucumber step definitions for cabinet portal Dashboard page
  */
 public class DashboardStepDefinitions {
+
     private RegistryUserProvider users = MasterConfig.getInstance().getRegistryConfig().getRegistryUserProvider();
     private TestContext testContext;
 
@@ -53,6 +55,12 @@ public class DashboardStepDefinitions {
     public void verifyOfficerLogOut(String userName) {
         new LoginSteps()
                 .logoutOfficerPortal();
+    }
+
+    @Тоді("користувач переходить на головну сторінку кабінету")
+    public void goToDashboardPage() {
+        new OfficerHeaderPanel()
+                .clickOnMainLink();
     }
 
     private Section getSection(String entry) {

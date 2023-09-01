@@ -17,6 +17,7 @@
 package platform.qa.officer.pages.components;
 
 import static org.openqa.selenium.By.xpath;
+import static platform.qa.base.utils.ValueUtils.replaceValueFragmentWithValueFromRequest;
 
 import platform.qa.base.BasePage;
 
@@ -27,6 +28,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import platform.qa.cucumber.TestContext;
 
 public class Table extends BasePage {
     @CacheLookup
@@ -65,33 +67,36 @@ public class Table extends BasePage {
     }
 
     public Row getLastRowFromTableByProcessDefinitionNameAndBusinessKey(String processDefinitionName,
-                                                                        String businessKey) {
+                                                                        String businessKey, TestContext testContext) {
+        String processedBusinessKey = replaceValueFragmentWithValueFromRequest(businessKey, testContext);
         return tableRows.stream()
                 .filter(row ->
                         row.getProcessDefinitionName().getText().contains(processDefinitionName) &&
-                                row.getBusinessKey().getText().contains(businessKey))
+                                row.getBusinessKey().getText().contains(processedBusinessKey))
                 .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Послуга \"%s\" з "
-                        + "ідентифікатором \"%s\" відсутня в таблиці", processDefinitionName, businessKey)));
+                        + "ідентифікатором \"%s\" відсутня в таблиці", processDefinitionName, processedBusinessKey)));
     }
 
     public Row getLastRowFromTableByProcessBusinessKeyAndResult(String processDefinitionName,
-                                                                String businessKey, String result) {
+                                                                String businessKey, String result, TestContext testContext) {
+        String processedBusinessKey = replaceValueFragmentWithValueFromRequest(businessKey, testContext);
         return tableRows.stream()
                 .filter(row ->
                         row.getProcessDefinitionName().getText().contains(processDefinitionName) &&
-                                row.getBusinessKey().getText().contains(businessKey) &&
+                                row.getBusinessKey().getText().contains(processedBusinessKey) &&
                                 row.getResult().getText().contains(result))
                 .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Послуга \"%s\" з "
                                 + "ідентифікатором \"%s\" та результатом \"%s\" відсутня у черзі послуг",
-                        processDefinitionName, businessKey, result)));
+                        processDefinitionName, processedBusinessKey, result)));
     }
 
-    public Row getLastRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName) {
+    public Row getLastRowByProcessBusinessKeyTaskName(String definitionName, String businessKey, String taskName, TestContext testContext) {
+        String processedBusinessKey = replaceValueFragmentWithValueFromRequest(businessKey, testContext);
         return tableRows.stream().filter(row -> row.getProcessDefinitionName().getText().equals(definitionName) &&
-                        row.getBusinessKey().getText().equals(businessKey) && row.getTaskDefinitionName().getText().equals(taskName))
+                        row.getBusinessKey().getText().equals(processedBusinessKey) && row.getTaskDefinitionName().getText().equals(taskName))
                 .max(Row::compareTo).orElseThrow(() -> new NoSuchElementException(String.format("Немає запису з "
                                 + "Послугою (%s), ідентифікатором послуги (%s) і задачею (%s)", definitionName,
-                        businessKey, taskName)));
+                        processedBusinessKey, taskName)));
     }
 
     private WebElement getOptionalElement(WebElement row, String xpathExpression) {
